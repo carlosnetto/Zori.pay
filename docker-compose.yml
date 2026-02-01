@@ -1,5 +1,5 @@
 services:
-  # O Banco de Dados
+  # Database
   db:
     image: postgres:16-alpine
     container_name: global_banking_db
@@ -12,19 +12,19 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-    # ADICIONE ESTAS LINHAS ABAIXO:
+    # Health check configuration
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U admin -d banking_system" ]
       interval: 5s
       timeout: 5s
       retries: 5
 
-  # O "Migrador" (Liquibase)
+  # Database Migrator (Liquibase)
   liquibase:
     image: liquibase/liquibase:4.25
     container_name: liquibase_migrator
     volumes:
-      # Usamos o caminho absoluto implícito para garantir o mapeamento
+      # Use implicit absolute path to ensure proper volume mapping
       - ${PWD}/migrations:/liquibase/changelog
     command: >
       --changelog-file=changelog-master.xml  --url=jdbc:postgresql://db:5432/banking_system  --username=admin  --password=mysecretpassword  --log-level=info  update
@@ -32,7 +32,7 @@ services:
       db:
         condition: service_healthy
 
-# Configuração de Saúde para o Postgres
+# Persistent storage
 volumes:
   pgdata:
 
