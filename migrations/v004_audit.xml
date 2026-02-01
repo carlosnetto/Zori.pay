@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    =====================================================================
+    v004_audit.xml - Audit Trail
+    =====================================================================
+
+    Compliance and audit logging:
+
+    PEOPLE AUDIT:
+    - people_history: Stores complete snapshots BEFORE any UPDATE or DELETE
+    - Triggered automatically by database trigger
+    - Includes timestamp, operation type, and changed_by user
+
+    VIEW:
+    - v_people_timeline: Combined view of historical + current records
+
+    DESIGN:
+    - Full "before" image stored (redundancy acceptable for central data)
+    - The "after" state is always the current row in the main table
+    - changed_by populated via session variable: SET LOCAL audit.current_user = 'username'
+    =====================================================================
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="004-001-people-history" author="carlos.netto">
+        <createTable tableName="people_history" schemaName="audit_schema">
+            <!-- History record metadata -->
+            <column name="history_id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="operation" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="changed_by" type="VARCHAR(255)"/>
+
+            <!-- Complete snapshot of person record BEFORE the change -->
+            <column name="person_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="full_name" type="VARCHAR(255)"/>
+            <column name="date_of_birth" type="DATE"/>
+            <column name="mother_name" type="VARCHAR(255)"/>
+            <column name="birth_city" type="VARCHAR(100)"/>
+            <column name="birth_country" type="CHAR(2)"/>
+        </createTable>
+
+        <createIndex indexName="idx_people_history_person" schemaName="audit_schema" tableName="people_history">
+            <column name="person_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_people_history_changed_at" schemaName="audit_schema" tableName="people_history">
+            <column name="changed_at"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="004-002-people-audit-trigger" author="carlos.netto">
+        <sql splitStatements="false">
+            CREATE OR REPLACE FUNCTION audit_schema.fn_people_audit()
+            RETURNS TRIGGER AS $$
+            BEGIN
+                IF TG_OP = 'UPDATE' OR TG_OP = 'DELETE' THEN
+                    INSERT INTO audit_schema.people_history (
+                        operation,
+                        changed_at,
+                        changed_by,
+                        person_id,
+                        full_name,
+                        date_of_birth,
+                        mother_name,
+                        birth_city,
+                        birth_country
+                    ) VALUES (
+                        TG_OP,
+                        CURRENT_TIMESTAMP,
+                        COALESCE(current_setting('audit.current_user', true), current_user),
+                        OLD.id,
+                        OLD.full_name,
+                        OLD.date_of_birth,
+                        OLD.mother_name,
+                        OLD.birth_city,
+                        OLD.birth_country
+                    );
+                END IF;
+
+                IF TG_OP = 'DELETE' THEN
+                    RETURN OLD;
+                ELSE
+                    RETURN NEW;
+                END IF;
+            END;
+            $$ LANGUAGE plpgsql;
+
+            CREATE TRIGGER trg_people_audit
+                BEFORE UPDATE OR DELETE ON registration_schema.people
+                FOR EACH ROW
+                EXECUTE FUNCTION audit_schema.fn_people_audit();
+        </sql>
+        <rollback>
+            DROP TRIGGER IF EXISTS trg_people_audit ON registration_schema.people;
+            DROP FUNCTION IF EXISTS audit_schema.fn_people_audit();
+        </rollback>
+    </changeSet>
+
+    <changeSet id="004-003-people-timeline-view" author="carlos.netto">
+        <sql>
+            CREATE OR REPLACE VIEW audit_schema.v_people_timeline AS
+            SELECT
+                h.person_id,
+                h.operation,
+                h.changed_at,
+                h.changed_by,
+                h.full_name,
+                h.date_of_birth,
+                h.mother_name,
+                h.birth_city,
+                h.birth_country,
+                'HISTORICAL' as record_status
+            FROM audit_schema.people_history h
+            UNION ALL
+            SELECT
+                p.id as person_id,
+                'CURRENT' as operation,
+                NULL as changed_at,
+                NULL as changed_by,
+                p.full_name,
+                p.date_of_birth,
+                p.mother_name,
+                p.birth_city,
+                p.birth_country,
+                'CURRENT' as record_status
+            FROM registration_schema.people p
+            ORDER BY person_id, changed_at NULLS LAST;
+        </sql>
+        <rollback>
+            DROP VIEW IF EXISTS audit_schema.v_people_timeline;
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

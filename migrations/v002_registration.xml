@@ -1,0 +1,462 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    =====================================================================
+    v002_registration.xml - Identity and Registration Tables
+    =====================================================================
+
+    Core identity management tables:
+
+    IDENTITY:
+    - people: Central person records (name, birth info)
+    - phones: Normalized phone registry (ITU E.164 format)
+    - emails: Normalized email registry
+    - person_phones: Many-to-many with login flag and type
+    - person_emails: Many-to-many with login flag and type
+
+    GEOGRAPHY:
+    - countries: ISO 3166-1 alpha-2 codes
+    - states: State/province codes per country
+    - addresses: Physical address records
+    - address_types: Domain table (home, work, mailing, other)
+    - person_addresses: Many-to-many with type and fiscal flag
+
+    DOCUMENTS (Country-specific KYC):
+    - person_documents_br: Brazilian docs (CPF, RG, PEP status)
+    - person_documents_us: US docs (SSN, driver's license)
+    - person_documents_etc: Generic/passport for other countries
+
+    DESIGN PRINCIPLES:
+    - Phones/emails normalized (stored once, referenced many times)
+    - Login credentials: partial unique index ensures one-person-per-login
+    - Multi-country support with country-specific document tables
+    =====================================================================
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <!-- ==================== Core Identity Tables ==================== -->
+    <changeSet id="002-001-people" author="carlos.netto">
+        <createTable tableName="people" schemaName="registration_schema">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="full_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_of_birth" type="DATE"/>
+            <column name="mother_name" type="VARCHAR(255)"/>
+            <column name="birth_city" type="VARCHAR(100)"/>
+            <column name="birth_country" type="CHAR(2)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="002-002-phones" author="carlos.netto">
+        <!-- Phone registry: unique phone numbers in ITU E.164 format -->
+        <createTable tableName="phones" schemaName="registration_schema">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="phone_number" type="VARCHAR(20)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="002-003-emails" author="carlos.netto">
+        <!-- Email registry: unique, normalized email addresses -->
+        <createTable tableName="emails" schemaName="registration_schema">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="email_address" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- ==================== Contact Relationships ==================== -->
+    <changeSet id="002-004-person-phones" author="carlos.netto">
+        <!--
+            Links people to phones. A phone can belong to multiple people,
+            but only ONE person can use a specific phone for login.
+        -->
+        <createTable tableName="person_phones" schemaName="registration_schema">
+            <column name="person_id" type="UUID">
+                <constraints nullable="false"
+                    foreignKeyName="fk_pp_person"
+                    referencedTableName="people"
+                    referencedTableSchemaName="registration_schema"
+                    referencedColumnNames="id"/>
+            </column>
+            <column name="phone_id" type="UUID">
+                <constraints nullable="false"
+                    foreignKeyName="fk_pp_phone"
+                    referencedTableName="phones"
+                    referencedTableSchemaName="registration_schema"
+                    referencedColumnNames="id"/>
+            </column>
+            <column name="phone_type" type="VARCHAR(20)"/> <!-- mobile, work, voip, etc. -->
+            <column name="is_primary_for_login" type="BOOLEAN" defaultValueBoolean="false"/>
+        </createTable>
+        <addPrimaryKey schemaName="registration_schema" tableName="person_phones"
+            columnNames="person_id, phone_id" constraintName="pk_person_phones"/>
+
+        <!-- A phone marked for login can only belong to ONE person -->
+        <sql>
+            CREATE UNIQUE INDEX idx_unique_login_phone
+            ON registration_schema.person_phones (phone_id)
+            WHERE is_primary_for_login = true;
+        </sql>
+    </changeSet>
+
+    <changeSet id="002-005-person-emails" author="carlos.netto">
+        <!--
+            Links people to emails. Same pattern as phones:
+            one email can belong to multiple people, but only one can use it for login.
+        -->
+        <createTable tableName="person_emails" schemaName="registration_schema">
+            <column name="person_id" type="UUID">
+                <constraints nullable="false"
+                    foreignKeyName="fk_pe_person"
+                    referencedTableName="people"
+                    referencedTableSchemaName="registration_schema"
+                    referencedColumnNames="id"/>
+            </column>
+            <column name="email_id" type="UUID">
+                <constraints nullable="false"
+                    foreignKeyName="fk_pe_email"
+                    referencedTableName="emails"
+                    referencedTableSchemaName="registration_schema"
+                    referencedColumnNames="id"/>
+            </column>
+            <column name="email_type" type="VARCHAR(20)"/> <!-- personal, work, other -->
+            <column name="is_primary_for_login" type="BOOLEAN" defaultValueBoolean="false"/>
+        </createTable>
+        <addPrimaryKey schemaName="registration_schema" tableName="person_emails"
+            columnNames="person_id, email_id" constraintName="pk_person_emails"/>
+
+        <!-- An email marked for login can only belong to ONE person -->
+        <sql>
+            CREATE UNIQUE INDEX idx_unique_login_email
+            ON registration_schema.person_emails (email_id)
+            WHERE is_primary_for_login = true;
+        </sql>
+    </changeSet>
+
+    <!-- ==================== Geography Tables ==================== -->
+    <changeSet id="002-006-countries" author="carlos.netto">
+        <!-- ISO 3166-1 alpha-2 country codes -->
+        <createTable tableName="countries" schemaName="registration_schema">
+            <column name="iso_code" type="CHAR(2)">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="002-007-states" author="carlos.netto">
+        <!-- State/province codes. Countries without states use "  " (two spaces) -->
+        <createTable tableName="states" schemaName="registration_schema">
+            <column name="country_code" type="CHAR(2)">
+                <constraints nullable="false"
+                    foreignKeyName="fk_state_country"
+                    referencedTableName="countries"
+                    referencedTableSchemaName="registration_schema"
+                    referencedColumnNames="iso_code"/>
+            </column>
+            <column name="state_code" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)"/>
+        </createTable>
+        <addPrimaryKey tableName="states" schemaName="registration_schema"
+            columnNames="country_code, state_code" constraintName="pk_states"/>
+    </changeSet>
+
+    <changeSet id="002-008-address-types" author="carlos.netto">
+        <!-- Domain table for address classifications -->
+        <createTable tableName="address_types" schemaName="registration_schema">
+            <column name="code" type="VARCHAR(20)">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="description" type="VARCHAR(100)"/>
+        </createTable>
+
+        <insert tableName="address_types" schemaName="registration_schema">
+            <column name="code" value="home"/><column name="description" value="Home address"/>
+        </insert>
+        <insert tableName="address_types" schemaName="registration_schema">
+            <column name="code" value="work"/><column name="description" value="Work address"/>
+        </insert>
+        <insert tableName="address_types" schemaName="registration_schema">
+            <column name="code" value="mailing"/><column name="description" value="Mailing address"/>
+        </insert>
+        <insert tableName="address_types" schemaName="registration_schema">
+            <column name="code" value="other"/><column name="description" value="Other address"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="002-009-addresses" author="carlos.netto">
+        <!-- Physical addresses with country/state reference -->
+        <createTable tableName="addresses" schemaName="registration_schema">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="line1" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="line2" type="VARCHAR(255)"/>
+            <column name="city" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="state_code" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="country_code" type="CHAR(2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="postal_code" type="VARCHAR(20)"/>
+        </createTable>
+
+        <!-- Composite FK to states table -->
+        <addForeignKeyConstraint
+            baseTableSchemaName="registration_schema"
+            baseTableName="addresses"
+            baseColumnNames="country_code, state_code"
+            referencedTableSchemaName="registration_schema"
+            referencedTableName="states"
+            referencedColumnNames="country_code, state_code"
+            constraintName="fk_address_state"/>
+    </changeSet>
+
+    <changeSet id="002-010-person-addresses" author="carlos.netto">
+        <!--
+            Links people to addresses with type and fiscal flag.
+            is_fiscal_address: marks the person's tax/legal address (one per person).
+        -->
+        <createTable tableName="person_addresses" schemaName="registration_schema">
+            <column name="person_id" type="UUID">
+                <constraints nullable="false"
+                    foreignKeyName="fk_pa_person"
+                    referencedTableName="people"
+                    referencedTableSchemaName="registration_schema"
+                    referencedColumnNames="id"/>
+            </column>
+            <column name="address_id" type="UUID">
+                <constraints nullable="false"
+                    foreignKeyName="fk_pa_address"
+                    referencedTableName="addresses"
+                    referencedTableSchemaName="registration_schema"
+                    referencedColumnNames="id"/>
+            </column>
+            <column name="address_type" type="VARCHAR(20)">
+                <constraints foreignKeyName="fk_pa_address_type"
+                    referencedTableName="address_types"
+                    referencedTableSchemaName="registration_schema"
+                    referencedColumnNames="code"/>
+            </column>
+            <column name="is_fiscal_address" type="BOOLEAN" defaultValueBoolean="false"/>
+        </createTable>
+        <addPrimaryKey schemaName="registration_schema" tableName="person_addresses"
+            columnNames="person_id, address_id" constraintName="pk_person_addresses"/>
+    </changeSet>
+
+    <changeSet id="002-011-postal-code-validation" author="carlos.netto">
+        <!-- Validates postal code format for BR and US -->
+        <sql splitStatements="false">
+            CREATE OR REPLACE FUNCTION registration_schema.fn_validate_postal_code()
+            RETURNS TRIGGER AS $$
+            BEGIN
+                -- Brazil: mandatory, format 99999-999
+                IF NEW.country_code = 'BR' THEN
+                    IF NEW.postal_code IS NULL OR NEW.postal_code = '' THEN
+                        RAISE EXCEPTION 'Postal code is mandatory for Brazil';
+                    END IF;
+                    IF NEW.postal_code !~ '^\d{5}-\d{3}$' THEN
+                        RAISE EXCEPTION 'Brazilian postal code must be in format 99999-999, got: %', NEW.postal_code;
+                    END IF;
+
+                -- USA: mandatory, format 99999 or 99999-9999
+                ELSIF NEW.country_code = 'US' THEN
+                    IF NEW.postal_code IS NULL OR NEW.postal_code = '' THEN
+                        RAISE EXCEPTION 'Postal code is mandatory for USA';
+                    END IF;
+                    IF NEW.postal_code !~ '^\d{5}(-\d{4})?$' THEN
+                        RAISE EXCEPTION 'US postal code must be in format 99999 or 99999-9999, got: %', NEW.postal_code;
+                    END IF;
+                END IF;
+
+                RETURN NEW;
+            END;
+            $$ LANGUAGE plpgsql;
+
+            CREATE TRIGGER trg_validate_postal_code
+                BEFORE INSERT OR UPDATE ON registration_schema.addresses
+                FOR EACH ROW
+                EXECUTE FUNCTION registration_schema.fn_validate_postal_code();
+        </sql>
+        <rollback>
+            DROP TRIGGER IF EXISTS trg_validate_postal_code ON registration_schema.addresses;
+            DROP FUNCTION IF EXISTS registration_schema.fn_validate_postal_code();
+        </rollback>
+    </changeSet>
+
+    <!-- ==================== Person Documents (KYC) ==================== -->
+    <changeSet id="002-012-person-documents-br" author="carlos.netto">
+        <!--
+            Brazilian KYC requirements:
+            - CPF: 11-digit tax ID (unique per person)
+            - RG: National ID card
+            - PEP: Politically Exposed Person flag (compliance)
+        -->
+        <createTable tableName="person_documents_br" schemaName="registration_schema">
+            <column name="person_id" type="UUID">
+                <constraints primaryKey="true"
+                    foreignKeyName="fk_docs_br_person"
+                    referencedTableName="people"
+                    referencedTableSchemaName="registration_schema"
+                    referencedColumnNames="id"/>
+            </column>
+            <column name="cpf" type="CHAR(11)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="rg_number" type="VARCHAR(20)"/>
+            <column name="rg_issuer" type="VARCHAR(20)"/>
+            <column name="rg_issued_at" type="DATE"/>
+            <column name="address_id" type="UUID">
+                <constraints foreignKeyName="fk_docs_br_address"
+                    referencedTableName="addresses"
+                    referencedTableSchemaName="registration_schema"
+                    referencedColumnNames="id"/>
+            </column>
+            <column name="profession" type="VARCHAR(100)"/>
+            <column name="employer_name" type="VARCHAR(200)"/>
+            <column name="monthly_income_brl" type="DECIMAL(15,2)"/>
+            <column name="is_pep" type="BOOLEAN" defaultValueBoolean="false"/>
+            <column name="pep_details" type="TEXT"/>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+
+        <createIndex indexName="idx_docs_br_cpf" schemaName="registration_schema" tableName="person_documents_br">
+            <column name="cpf"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="002-013-person-documents-us" author="carlos.netto">
+        <!--
+            US KYC requirements:
+            - SSN: Only last 4 digits stored, full SSN as hash for verification
+            - Driver's license or State ID
+        -->
+        <createTable tableName="person_documents_us" schemaName="registration_schema">
+            <column name="person_id" type="UUID">
+                <constraints primaryKey="true"
+                    foreignKeyName="fk_docs_us_person"
+                    referencedTableName="people"
+                    referencedTableSchemaName="registration_schema"
+                    referencedColumnNames="id"/>
+            </column>
+            <column name="ssn_last4" type="CHAR(4)"/>
+            <column name="ssn_hash" type="VARCHAR(128)"/>
+            <column name="drivers_license_number" type="VARCHAR(30)"/>
+            <column name="drivers_license_state" type="CHAR(2)"/>
+            <column name="drivers_license_issued_at" type="DATE"/>
+            <column name="drivers_license_expiry" type="DATE"/>
+            <column name="state_id_number" type="VARCHAR(30)"/>
+            <column name="state_id_state" type="CHAR(2)"/>
+            <column name="state_id_expiry" type="DATE"/>
+            <column name="address_id" type="UUID">
+                <constraints foreignKeyName="fk_docs_us_address"
+                    referencedTableName="addresses"
+                    referencedTableSchemaName="registration_schema"
+                    referencedColumnNames="id"/>
+            </column>
+            <column name="occupation" type="VARCHAR(100)"/>
+            <column name="employer_name" type="VARCHAR(200)"/>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="002-014-person-documents-etc" author="carlos.netto">
+        <!--
+            Generic documents for other countries:
+            - Passport information
+            - National ID (generic)
+            - A person can have documents for multiple countries
+        -->
+        <createTable tableName="person_documents_etc" schemaName="registration_schema">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="person_id" type="UUID">
+                <constraints nullable="false"
+                    foreignKeyName="fk_docs_etc_person"
+                    referencedTableName="people"
+                    referencedTableSchemaName="registration_schema"
+                    referencedColumnNames="id"/>
+            </column>
+            <column name="country_code" type="CHAR(2)">
+                <constraints nullable="false"
+                    foreignKeyName="fk_docs_etc_country"
+                    referencedTableName="countries"
+                    referencedTableSchemaName="registration_schema"
+                    referencedColumnNames="iso_code"/>
+            </column>
+            <column name="passport_number" type="VARCHAR(30)"/>
+            <column name="passport_country_issuer" type="CHAR(2)">
+                <constraints foreignKeyName="fk_docs_etc_passport_country"
+                    referencedTableName="countries"
+                    referencedTableSchemaName="registration_schema"
+                    referencedColumnNames="iso_code"/>
+            </column>
+            <column name="passport_issued_at" type="DATE"/>
+            <column name="passport_expiry_date" type="DATE"/>
+            <column name="passport_full_name" type="VARCHAR(255)"/>
+            <column name="passport_nationality" type="VARCHAR(100)"/>
+            <column name="passport_place_of_birth" type="VARCHAR(100)"/>
+            <column name="email_id" type="UUID">
+                <constraints foreignKeyName="fk_docs_etc_email"
+                    referencedTableName="emails"
+                    referencedTableSchemaName="registration_schema"
+                    referencedColumnNames="id"/>
+            </column>
+            <column name="phone_id" type="UUID">
+                <constraints foreignKeyName="fk_docs_etc_phone"
+                    referencedTableName="phones"
+                    referencedTableSchemaName="registration_schema"
+                    referencedColumnNames="id"/>
+            </column>
+            <column name="address_id" type="UUID">
+                <constraints foreignKeyName="fk_docs_etc_address"
+                    referencedTableName="addresses"
+                    referencedTableSchemaName="registration_schema"
+                    referencedColumnNames="id"/>
+            </column>
+            <column name="national_id_number" type="VARCHAR(50)"/>
+            <column name="national_id_type" type="VARCHAR(50)"/>
+            <column name="national_id_expiry" type="DATE"/>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+
+        <!-- One document set per person per country -->
+        <createIndex indexName="idx_docs_etc_person_country" schemaName="registration_schema"
+            tableName="person_documents_etc" unique="true">
+            <column name="person_id"/>
+            <column name="country_code"/>
+        </createIndex>
+
+        <createIndex indexName="idx_docs_etc_passport" schemaName="registration_schema"
+            tableName="person_documents_etc">
+            <column name="passport_number"/>
+            <column name="passport_country_issuer"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

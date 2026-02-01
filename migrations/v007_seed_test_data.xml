@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    =====================================================================
+    v007_seed_test_data.xml - Test/Demo Data (Carlos Netto)
+    =====================================================================
+
+    Seeds the founder's account for testing:
+
+    PERSON:
+    - Carlos Augusto Leite Netto
+    - Home address in Campinas, SP, Brazil
+    - Multiple phone numbers and email addresses
+
+    ACCOUNT HOLDER:
+    - Polygon blockchain wallet
+    - Public address: 0x732D57fE3478984E59fF48d224653097ec0C730f
+    - Currencies: BRL1, SOL
+
+    NOTE: This file can be excluded from production deployments.
+    =====================================================================
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <!-- ==================== Person Record ==================== -->
+    <changeSet id="007-001-carlos-netto-person" author="carlos.netto">
+        <insert tableName="people" schemaName="registration_schema">
+            <column name="id" value="550e8400-e29b-41d4-a716-446655440000"/>
+            <column name="full_name" value="CARLOS AUGUSTO LEITE NETTO"/>
+            <column name="date_of_birth" value="1965-05-17"/>
+            <column name="mother_name" value="MARIA HORTENCIA LEITE NETTO"/>
+            <column name="birth_city" value="Sorocaba"/>
+            <column name="birth_country" value="BR"/>
+        </insert>
+    </changeSet>
+
+    <!-- ==================== Address ==================== -->
+    <changeSet id="007-002-carlos-netto-address" author="carlos.netto">
+        <insert tableName="addresses" schemaName="registration_schema">
+            <column name="id" value="b8f5a7c3-2d9e-4f1a-8c6b-3e7d9f0a1b2c"/>
+            <column name="line1" value="Av Dr Jose Bonifacio Coutinho Nogueira, 225"/>
+            <column name="line2" value="Ed Cambui Ap 61"/>
+            <column name="city" value="Campinas"/>
+            <column name="state_code" value="SP"/>
+            <column name="country_code" value="BR"/>
+            <column name="postal_code" value="13091-611"/>
+        </insert>
+
+        <insert tableName="person_addresses" schemaName="registration_schema">
+            <column name="person_id" value="550e8400-e29b-41d4-a716-446655440000"/>
+            <column name="address_id" value="b8f5a7c3-2d9e-4f1a-8c6b-3e7d9f0a1b2c"/>
+            <column name="address_type" value="home"/>
+            <column name="is_fiscal_address" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+
+    <!-- ==================== Phone Numbers ==================== -->
+    <changeSet id="007-003-carlos-netto-phones" author="carlos.netto">
+        <!-- Mobile - Primary for login -->
+        <insert tableName="phones" schemaName="registration_schema">
+            <column name="id" value="d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f80"/>
+            <column name="phone_number" value="+5519993455780"/>
+        </insert>
+        <!-- Work -->
+        <insert tableName="phones" schemaName="registration_schema">
+            <column name="id" value="e5f6a7b8-c9d0-4e1f-2a3b-4c5d6e7f8091"/>
+            <column name="phone_number" value="+551937947700"/>
+        </insert>
+        <!-- Work Mobile -->
+        <insert tableName="phones" schemaName="registration_schema">
+            <column name="id" value="f6a7b8c9-d0e1-4f2a-3b4c-5d6e7f8091a2"/>
+            <column name="phone_number" value="+5519991112210"/>
+        </insert>
+        <!-- VoIP -->
+        <insert tableName="phones" schemaName="registration_schema">
+            <column name="id" value="a7b8c9d0-e1f2-4a3b-4c5d-6e7f8091a2b3"/>
+            <column name="phone_number" value="+16504680647"/>
+        </insert>
+        <!-- US Mobile -->
+        <insert tableName="phones" schemaName="registration_schema">
+            <column name="id" value="b8c9d0e1-f2a3-4b4c-5d6e-7f8091a2b3c4"/>
+            <column name="phone_number" value="+19714066066"/>
+        </insert>
+
+        <!-- Link phones to person -->
+        <insert tableName="person_phones" schemaName="registration_schema">
+            <column name="person_id" value="550e8400-e29b-41d4-a716-446655440000"/>
+            <column name="phone_id" value="d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f80"/>
+            <column name="phone_type" value="mobile"/>
+            <column name="is_primary_for_login" valueBoolean="true"/>
+        </insert>
+        <insert tableName="person_phones" schemaName="registration_schema">
+            <column name="person_id" value="550e8400-e29b-41d4-a716-446655440000"/>
+            <column name="phone_id" value="e5f6a7b8-c9d0-4e1f-2a3b-4c5d6e7f8091"/>
+            <column name="phone_type" value="work"/>
+        </insert>
+        <insert tableName="person_phones" schemaName="registration_schema">
+            <column name="person_id" value="550e8400-e29b-41d4-a716-446655440000"/>
+            <column name="phone_id" value="f6a7b8c9-d0e1-4f2a-3b4c-5d6e7f8091a2"/>
+            <column name="phone_type" value="work"/>
+        </insert>
+        <insert tableName="person_phones" schemaName="registration_schema">
+            <column name="person_id" value="550e8400-e29b-41d4-a716-446655440000"/>
+            <column name="phone_id" value="a7b8c9d0-e1f2-4a3b-4c5d-6e7f8091a2b3"/>
+            <column name="phone_type" value="voip"/>
+        </insert>
+        <insert tableName="person_phones" schemaName="registration_schema">
+            <column name="person_id" value="550e8400-e29b-41d4-a716-446655440000"/>
+            <column name="phone_id" value="b8c9d0e1-f2a3-4b4c-5d6e-7f8091a2b3c4"/>
+            <column name="phone_type" value="mobile"/>
+        </insert>
+    </changeSet>
+
+    <!-- ==================== Email Addresses ==================== -->
+    <changeSet id="007-004-carlos-netto-emails" author="carlos.netto">
+        <!-- Primary for login -->
+        <insert tableName="emails" schemaName="registration_schema">
+            <column name="id" value="c9d0e1f2-a3b4-4c5d-6e7f-8091a2b3c4d5"/>
+            <column name="email_address" value="carlos.netto@gmail.com"/>
+        </insert>
+        <insert tableName="emails" schemaName="registration_schema">
+            <column name="id" value="d0e1f2a3-b4c5-4d6e-7f80-91a2b3c4d5e6"/>
+            <column name="email_address" value="cnetto@yahoo.com"/>
+        </insert>
+        <insert tableName="emails" schemaName="registration_schema">
+            <column name="id" value="e1f2a3b4-c5d6-4e7f-8091-a2b3c4d5e6f7"/>
+            <column name="email_address" value="carlos.netto@outlook.com"/>
+        </insert>
+        <insert tableName="emails" schemaName="registration_schema">
+            <column name="id" value="f2a3b4c5-d6e7-4f80-91a2-b3c4d5e6f7a8"/>
+            <column name="email_address" value="carlos.netto@matera.com"/>
+        </insert>
+
+        <!-- Link emails to person -->
+        <insert tableName="person_emails" schemaName="registration_schema">
+            <column name="person_id" value="550e8400-e29b-41d4-a716-446655440000"/>
+            <column name="email_id" value="c9d0e1f2-a3b4-4c5d-6e7f-8091a2b3c4d5"/>
+            <column name="email_type" value="personal"/>
+            <column name="is_primary_for_login" valueBoolean="true"/>
+        </insert>
+        <insert tableName="person_emails" schemaName="registration_schema">
+            <column name="person_id" value="550e8400-e29b-41d4-a716-446655440000"/>
+            <column name="email_id" value="d0e1f2a3-b4c5-4d6e-7f80-91a2b3c4d5e6"/>
+            <column name="email_type" value="personal"/>
+        </insert>
+        <insert tableName="person_emails" schemaName="registration_schema">
+            <column name="person_id" value="550e8400-e29b-41d4-a716-446655440000"/>
+            <column name="email_id" value="e1f2a3b4-c5d6-4e7f-8091-a2b3c4d5e6f7"/>
+            <column name="email_type" value="personal"/>
+        </insert>
+        <insert tableName="person_emails" schemaName="registration_schema">
+            <column name="person_id" value="550e8400-e29b-41d4-a716-446655440000"/>
+            <column name="email_id" value="f2a3b4c5-d6e7-4f80-91a2-b3c4d5e6f7a8"/>
+            <column name="email_type" value="work"/>
+        </insert>
+    </changeSet>
+
+    <!-- ==================== Account Holder ==================== -->
+    <changeSet id="007-005-carlos-netto-account-holder" author="carlos.netto">
+        <insert tableName="account_holders" schemaName="accounts_schema">
+            <column name="id" value="f47ac10b-58cc-4372-a567-0e02b2c3d479"/>
+            <column name="main_person_id" value="550e8400-e29b-41d4-a716-446655440000"/>
+        </insert>
+    </changeSet>
+
+    <!-- ==================== Polygon Blockchain Wallet ==================== -->
+    <changeSet id="007-006-carlos-netto-polygon-wallet" author="carlos.netto">
+        <!--
+            Polygon wallet for Carlos Netto
+            Public address: 0x732D57fE3478984E59fF48d224653097ec0C730f (REAL ADDRESS)
+
+            IMPORTANT: The encrypted_master_seed contains a PLACEHOLDER.
+            The real private key must be encrypted with AES-256-GCM and updated
+            via a secure process (never committed to version control).
+        -->
+        <insert tableName="account_blockchain" schemaName="accounts_schema">
+            <column name="id" value="7c9e6679-7425-40de-944b-e07fc1f90ae7"/>
+            <column name="account_holder_id" value="f47ac10b-58cc-4372-a567-0e02b2c3d479"/>
+            <column name="blockchain_code" value="POLYGON"/>
+            <column name="encrypted_master_seed" valueComputed="decode('504c414345484f4c4445525f544f5f42455f555044415445445f5749544821', 'hex')"/>
+            <column name="encryption_iv" valueComputed="decode('000000000000000000000000', 'hex')"/>
+            <column name="encryption_auth_tag" valueComputed="decode('00000000000000000000000000000000', 'hex')"/>
+            <column name="encryption_key_id" value="PLACEHOLDER_TO_BE_UPDATED"/>
+            <column name="key_derivation_standard" value="BIP44"/>
+        </insert>
+
+        <insert tableName="account_blockchain_addresses" schemaName="accounts_schema">
+            <column name="id" value="a1b2c3d4-e5f6-4789-abcd-ef0123456789"/>
+            <column name="account_blockchain_id" value="7c9e6679-7425-40de-944b-e07fc1f90ae7"/>
+            <column name="public_address" value="0x732D57fE3478984E59fF48d224653097ec0C730f"/>
+            <column name="derivation_path" value="m/44'/60'/0'/0/0"/>
+            <column name="address_index" valueNumeric="0"/>
+            <column name="label" value="Main Polygon Address"/>
+            <column name="is_active" valueBoolean="true"/>
+            <column name="is_primary" valueBoolean="true"/>
+        </insert>
+    </changeSet>
+
+    <!-- ==================== Crypto Accounts ==================== -->
+    <changeSet id="007-007-carlos-netto-accounts" author="carlos.netto">
+        <!-- BRL1 account on Polygon -->
+        <insert tableName="accounts" schemaName="accounts_schema">
+            <column name="id" value="3f2504e0-4f89-11d3-9a0c-0305e82c3301"/>
+            <column name="account_holder_id" value="f47ac10b-58cc-4372-a567-0e02b2c3d479"/>
+            <column name="country_code" value="BR"/>
+            <column name="currency_code" value="BRL1"/>
+            <column name="account_type" value="crypto"/>
+            <column name="status" value="active"/>
+        </insert>
+
+        <!-- SOL account on Polygon (wrapped) -->
+        <insert tableName="accounts" schemaName="accounts_schema">
+            <column name="id" value="9b2e5f3a-c8d1-4e67-b890-1a2b3c4d5e6f"/>
+            <column name="account_holder_id" value="f47ac10b-58cc-4372-a567-0e02b2c3d479"/>
+            <column name="country_code" value="BR"/>
+            <column name="currency_code" value="SOL"/>
+            <column name="account_type" value="crypto"/>
+            <column name="status" value="active"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

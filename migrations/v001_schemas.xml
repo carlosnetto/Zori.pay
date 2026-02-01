@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    =====================================================================
+    v001_schemas.xml - Database Schemas and Extensions
+    =====================================================================
+
+    Creates the foundational database infrastructure:
+
+    SCHEMAS:
+    - registration_schema: Personal identity data (people, contacts, addresses, documents)
+    - accounts_schema: Financial accounts, currencies, blockchain wallets
+    - audit_schema: Audit trails and compliance logging
+
+    EXTENSIONS:
+    - pgcrypto: Provides gen_random_uuid() for UUID generation
+    =====================================================================
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="001-create-schemas" author="carlos.netto">
+        <sql>
+            CREATE SCHEMA IF NOT EXISTS registration_schema;
+            CREATE SCHEMA IF NOT EXISTS accounts_schema;
+            CREATE SCHEMA IF NOT EXISTS audit_schema;
+            CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

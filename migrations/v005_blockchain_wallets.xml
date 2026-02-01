@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    =====================================================================
+    v005_blockchain_wallets.xml - HD Wallet and Blockchain Address Management
+    =====================================================================
+
+    Hierarchical Deterministic (HD) wallet support:
+
+    DOMAIN:
+    - key_derivation_standards: BIP-44, BIP-49, BIP-84, BIP-86, SLIP-44
+
+    WALLET STRUCTURE:
+    - account_blockchain: HD wallet per account holder per blockchain
+        - Stores AES-256-GCM encrypted master seed
+        - One wallet can derive unlimited addresses
+
+    ADDRESSES:
+    - account_blockchain_addresses: Derived addresses from HD wallet
+        - derivation_path: e.g., m/44'/60'/0'/0/0
+        - is_active: On/off flag for privacy rotation
+        - is_primary: Default receiving address
+        - deactivated_at: Auto-set by trigger when disabled
+
+    SECURITY NOTES:
+    - Master seed encrypted with AES-256-GCM
+    - encryption_iv: 12-byte nonce (never reuse!)
+    - encryption_auth_tag: 16-byte GCM authentication tag
+    - encryption_key_id: Reference to HSM/KMS key
+    - Actual encryption key stored in HSM/KMS, never in database
+    =====================================================================
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="005-001-key-derivation-standards" author="carlos.netto">
+        <createTable tableName="key_derivation_standards" schemaName="accounts_schema">
+            <column name="code" type="VARCHAR(20)">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(100)"/>
+            <column name="description" type="VARCHAR(500)"/>
+        </createTable>
+
+        <insert tableName="key_derivation_standards" schemaName="accounts_schema">
+            <column name="code" value="BIP44"/>
+            <column name="name" value="BIP-44"/>
+            <column name="description" value="Multi-Account Hierarchy for Deterministic Wallets. Path: m/purpose'/coin_type'/account'/change/address_index"/>
+        </insert>
+        <insert tableName="key_derivation_standards" schemaName="accounts_schema">
+            <column name="code" value="BIP49"/>
+            <column name="name" value="BIP-49"/>
+            <column name="description" value="Derivation scheme for P2WPKH-nested-in-P2SH based accounts (SegWit compatible)"/>
+        </insert>
+        <insert tableName="key_derivation_standards" schemaName="accounts_schema">
+            <column name="code" value="BIP84"/>
+            <column name="name" value="BIP-84"/>
+            <column name="description" value="Derivation scheme for P2WPKH based accounts (Native SegWit)"/>
+        </insert>
+        <insert tableName="key_derivation_standards" schemaName="accounts_schema">
+            <column name="code" value="BIP86"/>
+            <column name="name" value="BIP-86"/>
+            <column name="description" value="Derivation scheme for P2TR (Taproot) based accounts"/>
+        </insert>
+        <insert tableName="key_derivation_standards" schemaName="accounts_schema">
+            <column name="code" value="SLIP44"/>
+            <column name="name" value="SLIP-44"/>
+            <column name="description" value="Registered coin types for BIP-44. Extends BIP-44 with standardized coin type indices"/>
+        </insert>
+        <insert tableName="key_derivation_standards" schemaName="accounts_schema">
+            <column name="code" value="CUSTOM"/>
+            <column name="name" value="Custom"/>
+            <column name="description" value="Non-standard or proprietary derivation scheme"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="005-002-account-blockchain" author="carlos.netto">
+        <!--
+            HD Wallet: One per account holder per blockchain.
+            Stores encrypted BIP-39 seed from which all addresses are derived.
+        -->
+        <createTable tableName="account_blockchain" schemaName="accounts_schema">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="account_holder_id" type="UUID">
+                <constraints nullable="false"
+                    foreignKeyName="fk_acct_bc_holder"
+                    referencedTableName="account_holders"
+                    referencedTableSchemaName="accounts_schema"
+                    referencedColumnNames="id"/>
+            </column>
+            <column name="blockchain_code" type="VARCHAR(20)">
+                <constraints nullable="false"
+                    foreignKeyName="fk_acct_bc_network"
+                    referencedTableName="blockchain_networks"
+                    referencedTableSchemaName="accounts_schema"
+                    referencedColumnNames="code"/>
+            </column>
+            <!-- AES-256-GCM encrypted BIP-39 seed (64 bytes from mnemonic) -->
+            <column name="encrypted_master_seed" type="BYTEA">
+                <constraints nullable="false"/>
+            </column>
+            <!-- AES-GCM nonce (12 bytes) - must be unique per encryption -->
+            <column name="encryption_iv" type="BYTEA">
+                <constraints nullable="false"/>
+            </column>
+            <!-- AES-GCM authentication tag (16 bytes) -->
+            <column name="encryption_auth_tag" type="BYTEA">
+                <constraints nullable="false"/>
+            </column>
+            <!-- HSM/KMS key reference for key rotation tracking -->
+            <column name="encryption_key_id" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="key_derivation_standard" type="VARCHAR(20)" defaultValue="BIP44">
+                <constraints foreignKeyName="fk_acct_bc_kds"
+                    referencedTableName="key_derivation_standards"
+                    referencedTableSchemaName="accounts_schema"
+                    referencedColumnNames="code"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint tableName="account_blockchain" schemaName="accounts_schema"
+            columnNames="account_holder_id, blockchain_code"
+            constraintName="uq_holder_blockchain"/>
+
+        <createIndex tableName="account_blockchain" schemaName="accounts_schema" indexName="idx_acct_bc_holder">
+            <column name="account_holder_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="005-003-blockchain-addresses" author="carlos.netto">
+        <!--
+            Derived addresses from HD wallet.
+            Each address has a derivation path; private key = seed + path.
+            is_primary: Default receiving address (one per wallet).
+            is_active: Can be disabled for privacy rotation.
+        -->
+        <createTable tableName="account_blockchain_addresses" schemaName="accounts_schema">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="account_blockchain_id" type="UUID">
+                <constraints nullable="false"
+                    foreignKeyName="fk_bc_addr_wallet"
+                    referencedTableName="account_blockchain"
+                    referencedTableSchemaName="accounts_schema"
+                    referencedColumnNames="id"/>
+            </column>
+            <column name="public_address" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <!-- BIP-44 path, e.g., "m/44'/60'/0'/0/0" -->
+            <column name="derivation_path" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="address_index" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="label" type="VARCHAR(100)"/>
+            <column name="is_active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_primary" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deactivated_at" type="TIMESTAMP WITH TIME ZONE"/>
+        </createTable>
+
+        <addUniqueConstraint tableName="account_blockchain_addresses" schemaName="accounts_schema"
+            columnNames="account_blockchain_id, derivation_path"
+            constraintName="uq_wallet_derivation_path"/>
+
+        <addUniqueConstraint tableName="account_blockchain_addresses" schemaName="accounts_schema"
+            columnNames="account_blockchain_id, public_address"
+            constraintName="uq_wallet_address"/>
+
+        <createIndex tableName="account_blockchain_addresses" schemaName="accounts_schema" indexName="idx_bc_addr_wallet">
+            <column name="account_blockchain_id"/>
+        </createIndex>
+
+        <createIndex tableName="account_blockchain_addresses" schemaName="accounts_schema" indexName="idx_bc_addr_active">
+            <column name="is_active"/>
+        </createIndex>
+
+        <createIndex tableName="account_blockchain_addresses" schemaName="accounts_schema" indexName="idx_bc_addr_public">
+            <column name="public_address"/>
+        </createIndex>
+
+        <!-- Only one primary address per wallet -->
+        <sql>
+            CREATE UNIQUE INDEX uq_wallet_primary_address
+            ON accounts_schema.account_blockchain_addresses (account_blockchain_id)
+            WHERE is_primary = true;
+        </sql>
+        <rollback>
+            DROP INDEX IF EXISTS accounts_schema.uq_wallet_primary_address;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="005-004-deactivation-trigger" author="carlos.netto">
+        <!-- Auto-set deactivated_at when is_active changes -->
+        <sql splitStatements="false">
+            CREATE OR REPLACE FUNCTION accounts_schema.set_address_deactivated_at()
+            RETURNS TRIGGER AS $$
+            BEGIN
+                IF NEW.is_active = false AND OLD.is_active = true THEN
+                    NEW.deactivated_at = CURRENT_TIMESTAMP;
+                ELSIF NEW.is_active = true AND OLD.is_active = false THEN
+                    NEW.deactivated_at = NULL;
+                END IF;
+                RETURN NEW;
+            END;
+            $$ LANGUAGE plpgsql;
+
+            CREATE TRIGGER trg_address_deactivation
+            BEFORE UPDATE ON accounts_schema.account_blockchain_addresses
+            FOR EACH ROW
+            EXECUTE FUNCTION accounts_schema.set_address_deactivated_at();
+        </sql>
+        <rollback>
+            DROP TRIGGER IF EXISTS trg_address_deactivation ON accounts_schema.account_blockchain_addresses;
+            DROP FUNCTION IF EXISTS accounts_schema.set_address_deactivated_at();
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

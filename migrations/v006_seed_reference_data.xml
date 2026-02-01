@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    =====================================================================
+    v006_seed_reference_data.xml - Reference Data
+    =====================================================================
+
+    Seeds all lookup/reference data:
+
+    GEOGRAPHY:
+    - Countries: BR, US, MC, VA, SG
+    - States: All Brazilian states (27), US states (50 + DC), stateless placeholders
+
+    BLOCKCHAIN NETWORKS:
+    - L1s: Bitcoin, Ethereum, Solana, Polygon, Avalanche, Algorand, Stellar,
+           Tron, NEAR, Hedera, Celo, Sui, Aptos, BNB Chain, Fantom, Polkadot,
+           Cosmos, Cardano, XRP, TON
+    - L2s: Arbitrum, Optimism, Base, zkSync, Linea, Moonbeam, Mantle, Scroll, Blast
+    - Private/Enterprise: Rayls (Parfin), Arc (Circle), Noble (Cosmos)
+
+    CURRENCIES:
+    - Stablecoins: USDC, USDT, DAI, FRAX, TUSD, BUSD, USDP, GUSD, LUSD, EURC, PYUSD
+    - Brazilian: BRL1, BRLA, BRLV, BRLD
+    - Native Crypto: BTC, ETH, SOL, POL, BNB, AVAX
+    - Fiat (ISO 4217): 150+ currencies with proper decimal precision
+
+    CONTRACT ADDRESSES:
+    - USDC, USDT, DAI, EURC, PYUSD and others on supported chains
+    =====================================================================
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <!-- ==================== Countries ==================== -->
+    <changeSet id="006-001-countries" author="carlos.netto">
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="BR"/><column name="name" value="Brazil"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="US"/><column name="name" value="United States"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="MC"/><column name="name" value="Monaco"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="VA"/><column name="name" value="Vatican City"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="SG"/><column name="name" value="Singapore"/></insert>
+    </changeSet>
+
+    <!-- ==================== Brazilian States (27) ==================== -->
+    <changeSet id="006-002-states-brazil" author="carlos.netto">
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="BR"/><column name="state_code" value="AC"/><column name="name" value="Acre"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="BR"/><column name="state_code" value="AL"/><column name="name" value="Alagoas"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="BR"/><column name="state_code" value="AP"/><column name="name" value="Amapa"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="BR"/><column name="state_code" value="AM"/><column name="name" value="Amazonas"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="BR"/><column name="state_code" value="BA"/><column name="name" value="Bahia"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="BR"/><column name="state_code" value="CE"/><column name="name" value="Ceara"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="BR"/><column name="state_code" value="DF"/><column name="name" value="Distrito Federal"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="BR"/><column name="state_code" value="ES"/><column name="name" value="Espirito Santo"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="BR"/><column name="state_code" value="GO"/><column name="name" value="Goias"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="BR"/><column name="state_code" value="MA"/><column name="name" value="Maranhao"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="BR"/><column name="state_code" value="MT"/><column name="name" value="Mato Grosso"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="BR"/><column name="state_code" value="MS"/><column name="name" value="Mato Grosso do Sul"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="BR"/><column name="state_code" value="MG"/><column name="name" value="Minas Gerais"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="BR"/><column name="state_code" value="PA"/><column name="name" value="Para"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="BR"/><column name="state_code" value="PB"/><column name="name" value="Paraiba"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="BR"/><column name="state_code" value="PR"/><column name="name" value="Parana"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="BR"/><column name="state_code" value="PE"/><column name="name" value="Pernambuco"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="BR"/><column name="state_code" value="PI"/><column name="name" value="Piaui"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="BR"/><column name="state_code" value="RJ"/><column name="name" value="Rio de Janeiro"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="BR"/><column name="state_code" value="RN"/><column name="name" value="Rio Grande do Norte"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="BR"/><column name="state_code" value="RS"/><column name="name" value="Rio Grande do Sul"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="BR"/><column name="state_code" value="RO"/><column name="name" value="Rondonia"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="BR"/><column name="state_code" value="RR"/><column name="name" value="Roraima"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="BR"/><column name="state_code" value="SC"/><column name="name" value="Santa Catarina"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="BR"/><column name="state_code" value="SP"/><column name="name" value="Sao Paulo"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="BR"/><column name="state_code" value="SE"/><column name="name" value="Sergipe"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="BR"/><column name="state_code" value="TO"/><column name="name" value="Tocantins"/></insert>
+    </changeSet>
+
+    <!-- ==================== US States (50 + DC) ==================== -->
+    <changeSet id="006-003-states-us" author="carlos.netto">
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="AL"/><column name="name" value="Alabama"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="AK"/><column name="name" value="Alaska"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="AZ"/><column name="name" value="Arizona"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="AR"/><column name="name" value="Arkansas"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="CA"/><column name="name" value="California"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="CO"/><column name="name" value="Colorado"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="CT"/><column name="name" value="Connecticut"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="DE"/><column name="name" value="Delaware"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="DC"/><column name="name" value="District of Columbia"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="FL"/><column name="name" value="Florida"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="GA"/><column name="name" value="Georgia"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="HI"/><column name="name" value="Hawaii"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="ID"/><column name="name" value="Idaho"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="IL"/><column name="name" value="Illinois"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="IN"/><column name="name" value="Indiana"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="IA"/><column name="name" value="Iowa"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="KS"/><column name="name" value="Kansas"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="KY"/><column name="name" value="Kentucky"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="LA"/><column name="name" value="Louisiana"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="ME"/><column name="name" value="Maine"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="MD"/><column name="name" value="Maryland"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="MA"/><column name="name" value="Massachusetts"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="MI"/><column name="name" value="Michigan"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="MN"/><column name="name" value="Minnesota"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="MS"/><column name="name" value="Mississippi"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="MO"/><column name="name" value="Missouri"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="MT"/><column name="name" value="Montana"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="NE"/><column name="name" value="Nebraska"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="NV"/><column name="name" value="Nevada"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="NH"/><column name="name" value="New Hampshire"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="NJ"/><column name="name" value="New Jersey"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="NM"/><column name="name" value="New Mexico"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="NY"/><column name="name" value="New York"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="NC"/><column name="name" value="North Carolina"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="ND"/><column name="name" value="North Dakota"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="OH"/><column name="name" value="Ohio"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="OK"/><column name="name" value="Oklahoma"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="OR"/><column name="name" value="Oregon"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="PA"/><column name="name" value="Pennsylvania"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="RI"/><column name="name" value="Rhode Island"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="SC"/><column name="name" value="South Carolina"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="SD"/><column name="name" value="South Dakota"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="TN"/><column name="name" value="Tennessee"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="TX"/><column name="name" value="Texas"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="UT"/><column name="name" value="Utah"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="VT"/><column name="name" value="Vermont"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="VA"/><column name="name" value="Virginia"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="WA"/><column name="name" value="Washington"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="WV"/><column name="name" value="West Virginia"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="WI"/><column name="name" value="Wisconsin"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="US"/><column name="state_code" value="WY"/><column name="name" value="Wyoming"/></insert>
+    </changeSet>
+
+    <!-- ==================== Stateless Countries ==================== -->
+    <changeSet id="006-004-states-stateless" author="carlos.netto">
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="MC"/><column name="state_code" value="  "/><column name="name" value="(No states)"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="VA"/><column name="state_code" value="  "/><column name="name" value="(No states)"/></insert>
+        <insert tableName="states" schemaName="registration_schema"><column name="country_code" value="SG"/><column name="state_code" value="  "/><column name="name" value="(No states)"/></insert>
+    </changeSet>
+
+    <!-- ==================== Blockchain Networks ==================== -->
+    <changeSet id="006-005-blockchain-networks" author="carlos.netto">
+        <!-- Major L1 Networks -->
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="BITCOIN"/><column name="name" value="Bitcoin"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="ETHEREUM"/><column name="name" value="Ethereum"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="SOLANA"/><column name="name" value="Solana"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="POLYGON"/><column name="name" value="Polygon"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="AVALANCHE"/><column name="name" value="Avalanche C-Chain"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="ALGORAND"/><column name="name" value="Algorand"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="STELLAR"/><column name="name" value="Stellar"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="TRON"/><column name="name" value="Tron"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="NEAR"/><column name="name" value="NEAR Protocol"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="HEDERA"/><column name="name" value="Hedera"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="CELO"/><column name="name" value="Celo"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="SUI"/><column name="name" value="Sui"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="APTOS"/><column name="name" value="Aptos"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="BNB"/><column name="name" value="BNB Chain"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="FANTOM"/><column name="name" value="Fantom"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="POLKADOT"/><column name="name" value="Polkadot"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="COSMOS"/><column name="name" value="Cosmos Hub"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="CARDANO"/><column name="name" value="Cardano"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="XRP"/><column name="name" value="XRP Ledger"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="TON"/><column name="name" value="TON (The Open Network)"/></insert>
+        <!-- L2 and Rollups -->
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="ARBITRUM"/><column name="name" value="Arbitrum One"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="OPTIMISM"/><column name="name" value="OP Mainnet"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="BASE"/><column name="name" value="Base"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="ZKSYNC"/><column name="name" value="zkSync Era"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="LINEA"/><column name="name" value="Linea"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="MOONBEAM"/><column name="name" value="Moonbeam"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="MANTLE"/><column name="name" value="Mantle"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="SCROLL"/><column name="name" value="Scroll"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="BLAST"/><column name="name" value="Blast"/></insert>
+        <!-- Private/Enterprise -->
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="RAYLS"/><column name="name" value="Rayls (Parfin)"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="ARC"/><column name="name" value="Arc (Circle)"/></insert>
+        <insert tableName="blockchain_networks" schemaName="accounts_schema"><column name="code" value="NOBLE"/><column name="name" value="Noble (Cosmos)"/></insert>
+    </changeSet>
+
+    <!-- ==================== Currencies - Stablecoins ==================== -->
+    <changeSet id="006-006-currencies-stablecoins" author="carlos.netto">
+        <insert tableName="currencies" schemaName="accounts_schema">
+            <column name="code" value="USDC"/><column name="name" value="USD Coin"/><column name="asset_type_code" value="stablecoin"/><column name="decimals" valueNumeric="6"/>
+        </insert>
+        <insert tableName="currencies" schemaName="accounts_schema">
+            <column name="code" value="USDT"/><column name="name" value="Tether USD"/><column name="asset_type_code" value="stablecoin"/><column name="decimals" valueNumeric="6"/>
+        </insert>
+        <insert tableName="currencies" schemaName="accounts_schema">
+            <column name="code" value="DAI"/><column name="name" value="Dai Stablecoin"/><column name="asset_type_code" value="stablecoin"/><column name="decimals" valueNumeric="18"/>
+        </insert>
+        <insert tableName="currencies" schemaName="accounts_schema">
+            <column name="code" value="FRAX"/><column name="name" value="Frax"/><column name="asset_type_code" value="stablecoin"/><column name="decimals" valueNumeric="18"/>
+        </insert>
+        <insert tableName="currencies" schemaName="accounts_schema">
+            <column name="code" value="TUSD"/><column name="name" value="TrueUSD"/><column name="asset_type_code" value="stablecoin"/><column name="decimals" valueNumeric="18"/>
+        </insert>
+        <insert tableName="currencies" schemaName="accounts_schema">
+            <column name="code" value="BUSD"/><column name="name" value="Binance USD"/><column name="asset_type_code" value="stablecoin"/><column name="decimals" valueNumeric="18"/>
+        </insert>
+        <insert tableName="currencies" schemaName="accounts_schema">
+            <column name="code" value="USDP"/><column name="name" value="Pax Dollar"/><column name="asset_type_code" value="stablecoin"/><column name="decimals" valueNumeric="18"/>
+        </insert>
+        <insert tableName="currencies" schemaName="accounts_schema">
+            <column name="code" value="GUSD"/><column name="name" value="Gemini Dollar"/><column name="asset_type_code" value="stablecoin"/><column name="decimals" valueNumeric="2"/>
+        </insert>
+        <insert tableName="currencies" schemaName="accounts_schema">
+            <column name="code" value="LUSD"/><column name="name" value="Liquity USD"/><column name="asset_type_code" value="stablecoin"/><column name="decimals" valueNumeric="18"/>
+        </insert>
+        <insert tableName="currencies" schemaName="accounts_schema">
+            <column name="code" value="EURC"/><column name="name" value="Euro Coin"/><column name="asset_type_code" value="stablecoin"/><column name="decimals" valueNumeric="6"/>
+        </insert>
+        <!-- PYUSD has variable decimals per chain -->
+        <insert tableName="currencies" schemaName="accounts_schema">
+            <column name="code" value="PYUSD"/><column name="name" value="PayPal USD"/><column name="asset_type_code" value="stablecoin"/>
+        </insert>
+        <!-- Brazilian Stablecoins -->
+        <insert tableName="currencies" schemaName="accounts_schema">
+            <column name="code" value="BRL1"/><column name="name" value="BRL1 Token"/><column name="asset_type_code" value="stablecoin"/><column name="decimals" valueNumeric="8"/>
+        </insert>
+        <insert tableName="currencies" schemaName="accounts_schema">
+            <column name="code" value="BRLA"/><column name="name" value="BRLA Stablecoin"/><column name="asset_type_code" value="stablecoin"/><column name="decimals" valueNumeric="18"/>
+        </insert>
+        <insert tableName="currencies" schemaName="accounts_schema">
+            <column name="code" value="BRLV"/><column name="name" value="BRLV Token"/><column name="asset_type_code" value="stablecoin"/><column name="decimals" valueNumeric="18"/>
+        </insert>
+        <insert tableName="currencies" schemaName="accounts_schema">
+            <column name="code" value="BRLD"/><column name="name" value="BRLD Token"/><column name="asset_type_code" value="stablecoin"/><column name="decimals" valueNumeric="18"/>
+        </insert>
+    </changeSet>
+
+    <!-- ==================== Currencies - Native Crypto ==================== -->
+    <changeSet id="006-007-currencies-crypto" author="carlos.netto">
+        <insert tableName="currencies" schemaName="accounts_schema">
+            <column name="code" value="BTC"/><column name="name" value="Bitcoin"/><column name="asset_type_code" value="crypto"/><column name="decimals" valueNumeric="8"/>
+        </insert>
+        <insert tableName="currencies" schemaName="accounts_schema">
+            <column name="code" value="ETH"/><column name="name" value="Ether"/><column name="asset_type_code" value="crypto"/><column name="decimals" valueNumeric="18"/>
+        </insert>
+        <insert tableName="currencies" schemaName="accounts_schema">
+            <column name="code" value="SOL"/><column name="name" value="Solana"/><column name="asset_type_code" value="crypto"/><column name="decimals" valueNumeric="9"/>
+        </insert>
+        <insert tableName="currencies" schemaName="accounts_schema">
+            <column name="code" value="POL"/><column name="name" value="Polygon"/><column name="asset_type_code" value="crypto"/><column name="decimals" valueNumeric="18"/>
+        </insert>
+        <insert tableName="currencies" schemaName="accounts_schema">
+            <column name="code" value="BNB"/><column name="name" value="BNB"/><column name="asset_type_code" value="crypto"/><column name="decimals" valueNumeric="18"/>
+        </insert>
+        <insert tableName="currencies" schemaName="accounts_schema">
+            <column name="code" value="AVAX"/><column name="name" value="Avalanche"/><column name="asset_type_code" value="crypto"/><column name="decimals" valueNumeric="18"/>
+        </insert>
+    </changeSet>
+
+    <!-- ==================== Currencies - Fiat (ISO 4217) ==================== -->
+    <changeSet id="006-008-currencies-fiat" author="carlos.netto">
+        <!-- 0 decimal currencies -->
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="JPY"/><column name="name" value="Japanese Yen"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="0"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="KRW"/><column name="name" value="South Korean Won"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="0"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="VND"/><column name="name" value="Vietnamese Dong"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="0"/></insert>
+        <!-- 3 decimal currencies -->
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="BHD"/><column name="name" value="Bahraini Dinar"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="3"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="KWD"/><column name="name" value="Kuwaiti Dinar"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="3"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="OMR"/><column name="name" value="Omani Rial"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="3"/></insert>
+        <!-- 2 decimal currencies (standard) -->
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="USD"/><column name="name" value="United States Dollar"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="EUR"/><column name="name" value="Euro"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="GBP"/><column name="name" value="Pound Sterling"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="BRL"/><column name="name" value="Brazilian Real"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="CAD"/><column name="name" value="Canadian Dollar"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="AUD"/><column name="name" value="Australian Dollar"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="CHF"/><column name="name" value="Swiss Franc"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="CNY"/><column name="name" value="Chinese Yuan"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="INR"/><column name="name" value="Indian Rupee"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="MXN"/><column name="name" value="Mexican Peso"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="SGD"/><column name="name" value="Singapore Dollar"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="HKD"/><column name="name" value="Hong Kong Dollar"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="ARS"/><column name="name" value="Argentine Peso"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="CLP"/><column name="name" value="Chilean Peso"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="0"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="COP"/><column name="name" value="Colombian Peso"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="PEN"/><column name="name" value="Peruvian Sol"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="ZAR"/><column name="name" value="South African Rand"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="AED"/><column name="name" value="UAE Dirham"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="SAR"/><column name="name" value="Saudi Riyal"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="ILS"/><column name="name" value="Israeli Shekel"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="PLN"/><column name="name" value="Polish Zloty"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="SEK"/><column name="name" value="Swedish Krona"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="NOK"/><column name="name" value="Norwegian Krone"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="DKK"/><column name="name" value="Danish Krone"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="NZD"/><column name="name" value="New Zealand Dollar"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="THB"/><column name="name" value="Thai Baht"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="PHP"/><column name="name" value="Philippine Peso"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="IDR"/><column name="name" value="Indonesian Rupiah"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="MYR"/><column name="name" value="Malaysian Ringgit"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="TRY"/><column name="name" value="Turkish Lira"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="RUB"/><column name="name" value="Russian Ruble"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="NGN"/><column name="name" value="Nigerian Naira"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="KES"/><column name="name" value="Kenyan Shilling"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="EGP"/><column name="name" value="Egyptian Pound"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="PKR"/><column name="name" value="Pakistani Rupee"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="BDT"/><column name="name" value="Bangladeshi Taka"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="TWD"/><column name="name" value="Taiwan Dollar"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="CZK"/><column name="name" value="Czech Koruna"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="HUF"/><column name="name" value="Hungarian Forint"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="RON"/><column name="name" value="Romanian Leu"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+        <insert tableName="currencies" schemaName="accounts_schema"><column name="code" value="UAH"/><column name="name" value="Ukrainian Hryvnia"/><column name="asset_type_code" value="fiat"/><column name="decimals" valueNumeric="2"/></insert>
+    </changeSet>
+
+    <!-- ==================== Currency Blockchain Configs ==================== -->
+    <changeSet id="006-009-currency-blockchain-configs" author="carlos.netto">
+        <sql>
+            -- USDC contracts
+            INSERT INTO accounts_schema.currency_blockchain_configs (currency_id, blockchain_code, contract_address)
+            SELECT c.id, 'ETHEREUM', '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48' FROM accounts_schema.currencies c WHERE c.code = 'USDC';
+            INSERT INTO accounts_schema.currency_blockchain_configs (currency_id, blockchain_code, contract_address)
+            SELECT c.id, 'POLYGON', '0x3c499c542cef5e3811e1192ce70d8cc03d5c3359' FROM accounts_schema.currencies c WHERE c.code = 'USDC';
+            INSERT INTO accounts_schema.currency_blockchain_configs (currency_id, blockchain_code, contract_address)
+            SELECT c.id, 'ARBITRUM', '0xaf88d065e77c8cC2239327C5EDb3A432268e5831' FROM accounts_schema.currencies c WHERE c.code = 'USDC';
+            INSERT INTO accounts_schema.currency_blockchain_configs (currency_id, blockchain_code, contract_address)
+            SELECT c.id, 'BASE', '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' FROM accounts_schema.currencies c WHERE c.code = 'USDC';
+            INSERT INTO accounts_schema.currency_blockchain_configs (currency_id, blockchain_code, contract_address)
+            SELECT c.id, 'SOLANA', 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v' FROM accounts_schema.currencies c WHERE c.code = 'USDC';
+
+            -- USDT contracts
+            INSERT INTO accounts_schema.currency_blockchain_configs (currency_id, blockchain_code, contract_address)
+            SELECT c.id, 'ETHEREUM', '0xdac17f958d2ee523a2206206994597c13d831ec7' FROM accounts_schema.currencies c WHERE c.code = 'USDT';
+            INSERT INTO accounts_schema.currency_blockchain_configs (currency_id, blockchain_code, contract_address)
+            SELECT c.id, 'POLYGON', '0xc2132d05d31c914a87c6611c10748aeb04b58e8f' FROM accounts_schema.currencies c WHERE c.code = 'USDT';
+            INSERT INTO accounts_schema.currency_blockchain_configs (currency_id, blockchain_code, contract_address)
+            SELECT c.id, 'TRON', 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t' FROM accounts_schema.currencies c WHERE c.code = 'USDT';
+
+            -- DAI contracts
+            INSERT INTO accounts_schema.currency_blockchain_configs (currency_id, blockchain_code, contract_address)
+            SELECT c.id, 'ETHEREUM', '0x6B175474E89094C44Da98b954EedeAC495271d0F' FROM accounts_schema.currencies c WHERE c.code = 'DAI';
+            INSERT INTO accounts_schema.currency_blockchain_configs (currency_id, blockchain_code, contract_address)
+            SELECT c.id, 'POLYGON', '0x8f3cf7ad23cd3cadbd9735aff958023239c6a063' FROM accounts_schema.currencies c WHERE c.code = 'DAI';
+
+            -- PYUSD (variable decimals)
+            INSERT INTO accounts_schema.currency_blockchain_configs (currency_id, blockchain_code, network_decimals, contract_address)
+            SELECT c.id, 'ETHEREUM', 6, '0x6c3ea9036406852006290770BEdFcAbA0e23A0e8' FROM accounts_schema.currencies c WHERE c.code = 'PYUSD';
+            INSERT INTO accounts_schema.currency_blockchain_configs (currency_id, blockchain_code, network_decimals, contract_address)
+            SELECT c.id, 'SOLANA', 6, '2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo' FROM accounts_schema.currencies c WHERE c.code = 'PYUSD';
+
+            -- Native assets
+            INSERT INTO accounts_schema.currency_blockchain_configs (currency_id, blockchain_code)
+            SELECT c.id, 'ETHEREUM' FROM accounts_schema.currencies c WHERE c.code = 'ETH';
+            INSERT INTO accounts_schema.currency_blockchain_configs (currency_id, blockchain_code)
+            SELECT c.id, 'SOLANA' FROM accounts_schema.currencies c WHERE c.code = 'SOL';
+            INSERT INTO accounts_schema.currency_blockchain_configs (currency_id, blockchain_code)
+            SELECT c.id, 'POLYGON' FROM accounts_schema.currencies c WHERE c.code = 'POL';
+            INSERT INTO accounts_schema.currency_blockchain_configs (currency_id, blockchain_code)
+            SELECT c.id, 'BNB' FROM accounts_schema.currencies c WHERE c.code = 'BNB';
+            INSERT INTO accounts_schema.currency_blockchain_configs (currency_id, blockchain_code)
+            SELECT c.id, 'AVALANCHE' FROM accounts_schema.currencies c WHERE c.code = 'AVAX';
+            INSERT INTO accounts_schema.currency_blockchain_configs (currency_id, blockchain_code)
+            SELECT c.id, 'POLYGON' FROM accounts_schema.currencies c WHERE c.code = 'BRL1';
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

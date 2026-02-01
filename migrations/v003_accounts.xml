@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    =====================================================================
+    v003_accounts.xml - Financial Accounts Structure
+    =====================================================================
+
+    Financial domain tables:
+
+    DOMAIN TABLES:
+    - asset_types: Classification (fiat, crypto, stablecoin, points, other)
+    - blockchain_networks: Supported blockchains (Ethereum, Polygon, etc.)
+    - currencies: All currencies with decimal precision
+
+    ACCOUNT STRUCTURE:
+    - account_holders: Primary account holder entity
+    - holder_relationship_types: Domain table (joint_account, operator)
+    - account_holder_members: Additional people linked to accounts
+    - accounts: General account table (holder + country + currency + type)
+    - privileges: Access permissions for account holders
+
+    COUNTRY-SPECIFIC BANKING:
+    - account_details_br: Brazilian fiat (ISPB, bank code, branch, account)
+    - account_details_us: US fiat (routing number, account number)
+
+    BLOCKCHAIN INTEGRATION:
+    - currency_blockchain_configs: Maps currencies to blockchains with
+      contract addresses and network-specific decimal precision
+    =====================================================================
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <!-- ==================== Domain Tables ==================== -->
+    <changeSet id="003-001-asset-types" author="carlos.netto">
+        <createTable tableName="asset_types" schemaName="accounts_schema">
+            <column name="code" type="VARCHAR(20)">
+                <constraints primaryKey="true"/>
+            </column>
+        </createTable>
+
+        <insert tableName="asset_types" schemaName="accounts_schema"><column name="code" value="fiat"/></insert>
+        <insert tableName="asset_types" schemaName="accounts_schema"><column name="code" value="crypto"/></insert>
+        <insert tableName="asset_types" schemaName="accounts_schema"><column name="code" value="stablecoin"/></insert>
+        <insert tableName="asset_types" schemaName="accounts_schema"><column name="code" value="points"/></insert>
+        <insert tableName="asset_types" schemaName="accounts_schema"><column name="code" value="other"/></insert>
+    </changeSet>
+
+    <changeSet id="003-002-blockchain-networks" author="carlos.netto">
+        <!-- Supported blockchain networks (L1s and L2s) -->
+        <createTable tableName="blockchain_networks" schemaName="accounts_schema">
+            <column name="code" type="VARCHAR(20)">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(100)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="003-003-currencies" author="carlos.netto">
+        <!--
+            All supported currencies (fiat + crypto + stablecoins).
+            decimals: Default precision. NULL when it varies by blockchain.
+        -->
+        <createTable tableName="currencies" schemaName="accounts_schema">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="code" type="VARCHAR(20)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)"/>
+            <column name="decimals" type="INTEGER"/>
+            <column name="asset_type_code" type="VARCHAR(20)">
+                <constraints foreignKeyName="fk_curr_asset"
+                    referencedTableName="asset_types"
+                    referencedTableSchemaName="accounts_schema"
+                    referencedColumnNames="code"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="003-004-currency-blockchain-configs" author="carlos.netto">
+        <!--
+            Maps currencies to blockchains:
+            - contract_address: Token contract (NULL for native assets)
+            - network_decimals: Override when decimals differ per chain
+        -->
+        <createTable tableName="currency_blockchain_configs" schemaName="accounts_schema">
+            <column name="currency_id" type="UUID">
+                <constraints foreignKeyName="fk_cbc_curr"
+                    referencedTableName="currencies"
+                    referencedTableSchemaName="accounts_schema"
+                    referencedColumnNames="id"/>
+            </column>
+            <column name="blockchain_code" type="VARCHAR(20)">
+                <constraints foreignKeyName="fk_cbc_net"
+                    referencedTableName="blockchain_networks"
+                    referencedTableSchemaName="accounts_schema"
+                    referencedColumnNames="code"/>
+            </column>
+            <column name="network_decimals" type="INTEGER"/>
+            <column name="contract_address" type="VARCHAR(255)"/>
+        </createTable>
+        <addPrimaryKey tableName="currency_blockchain_configs" schemaName="accounts_schema"
+            columnNames="currency_id, blockchain_code" constraintName="pk_curr_blockchain"/>
+    </changeSet>
+
+    <!-- ==================== Account Holder Structure ==================== -->
+    <changeSet id="003-005-account-holders" author="carlos.netto">
+        <!--
+            Account holder: the owning entity for financial accounts.
+            Links to a main person (primary holder).
+        -->
+        <createTable tableName="account_holders" schemaName="accounts_schema">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="main_person_id" type="UUID">
+                <constraints foreignKeyName="fk_ah_person"
+                    referencedTableName="people"
+                    referencedTableSchemaName="registration_schema"
+                    referencedColumnNames="id"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="003-006-holder-relationship-types" author="carlos.netto">
+        <!-- Types of relationships for additional account members -->
+        <createTable tableName="holder_relationship_types" schemaName="accounts_schema">
+            <column name="code" type="VARCHAR(30)">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="description" type="VARCHAR(100)"/>
+        </createTable>
+
+        <insert tableName="holder_relationship_types" schemaName="accounts_schema">
+            <column name="code" value="joint_account"/>
+            <column name="description" value="Joint account holder with equal rights"/>
+        </insert>
+        <insert tableName="holder_relationship_types" schemaName="accounts_schema">
+            <column name="code" value="operator"/>
+            <column name="description" value="Account operator (limited access)"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="003-007-account-holder-members" author="carlos.netto">
+        <!-- Additional people linked to an account holder -->
+        <createTable tableName="account_holder_members" schemaName="accounts_schema">
+            <column name="account_holder_id" type="UUID">
+                <constraints nullable="false"
+                    foreignKeyName="fk_ahm_holder"
+                    referencedTableName="account_holders"
+                    referencedTableSchemaName="accounts_schema"
+                    referencedColumnNames="id"/>
+            </column>
+            <column name="person_id" type="UUID">
+                <constraints nullable="false"
+                    foreignKeyName="fk_ahm_person"
+                    referencedTableName="people"
+                    referencedTableSchemaName="registration_schema"
+                    referencedColumnNames="id"/>
+            </column>
+            <column name="relationship_type" type="VARCHAR(30)">
+                <constraints nullable="false"
+                    foreignKeyName="fk_ahm_rel_type"
+                    referencedTableName="holder_relationship_types"
+                    referencedTableSchemaName="accounts_schema"
+                    referencedColumnNames="code"/>
+            </column>
+            <column name="added_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+        <addPrimaryKey tableName="account_holder_members" schemaName="accounts_schema"
+            columnNames="account_holder_id, person_id" constraintName="pk_account_holder_members"/>
+    </changeSet>
+
+    <changeSet id="003-008-privileges" author="carlos.netto">
+        <!-- Access permissions linking people to account holders -->
+        <createTable tableName="privileges" schemaName="accounts_schema">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="person_id" type="UUID">
+                <constraints nullable="false"
+                    foreignKeyName="fk_priv_person"
+                    referencedTableName="people"
+                    referencedTableSchemaName="registration_schema"
+                    referencedColumnNames="id"/>
+            </column>
+            <column name="account_holder_id" type="UUID">
+                <constraints nullable="false"
+                    foreignKeyName="fk_priv_holder"
+                    referencedTableName="account_holders"
+                    referencedTableSchemaName="accounts_schema"
+                    referencedColumnNames="id"/>
+            </column>
+            <column name="privilege_type" type="VARCHAR(50)"/>
+            <column name="granted_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+    <!-- ==================== Accounts Table ==================== -->
+    <changeSet id="003-009-accounts" author="carlos.netto">
+        <!--
+            General account table: one account per (holder, country, currency, type).
+            Country-specific details are in separate tables (account_details_br, etc.)
+        -->
+        <createTable tableName="accounts" schemaName="accounts_schema">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="account_holder_id" type="UUID">
+                <constraints nullable="false"
+                    foreignKeyName="fk_account_holder"
+                    referencedTableName="account_holders"
+                    referencedTableSchemaName="accounts_schema"
+                    referencedColumnNames="id"/>
+            </column>
+            <column name="country_code" type="CHAR(2)">
+                <constraints nullable="false"
+                    foreignKeyName="fk_account_country"
+                    referencedTableName="countries"
+                    referencedTableSchemaName="registration_schema"
+                    referencedColumnNames="iso_code"/>
+            </column>
+            <column name="currency_code" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="account_type" type="VARCHAR(20)">
+                <constraints nullable="false"
+                    foreignKeyName="fk_account_type"
+                    referencedTableName="asset_types"
+                    referencedTableSchemaName="accounts_schema"
+                    referencedColumnNames="code"/>
+            </column>
+            <column name="status" type="VARCHAR(20)" defaultValue="active"/>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+
+        <addUniqueConstraint tableName="accounts" schemaName="accounts_schema"
+            columnNames="account_holder_id, country_code, currency_code, account_type"
+            constraintName="uq_account_holder_currency"/>
+    </changeSet>
+
+    <!-- ==================== Country-Specific Banking Details ==================== -->
+    <changeSet id="003-010-account-details-br" author="carlos.netto">
+        <!--
+            Brazilian fiat account details:
+            - ispb: 8-digit ISPB code (Sistema de Pagamentos Brasileiro)
+            - bank_code: 3-digit COMPE code
+            - branch_number: Agency number
+            - account_number: Full account including check digit
+        -->
+        <createTable tableName="account_details_br" schemaName="accounts_schema">
+            <column name="account_id" type="UUID">
+                <constraints primaryKey="true"
+                    foreignKeyName="fk_br_details_account"
+                    referencedTableName="accounts"
+                    referencedTableSchemaName="accounts_schema"
+                    referencedColumnNames="id"/>
+            </column>
+            <column name="ispb" type="CHAR(8)"/>
+            <column name="bank_code" type="CHAR(3)"/>
+            <column name="branch_number" type="VARCHAR(10)"/>
+            <column name="account_number" type="VARCHAR(20)"/>
+        </createTable>
+
+        <sql>
+            COMMENT ON COLUMN accounts_schema.account_details_br.account_number IS
+            'Full account number including check digit as the last character';
+        </sql>
+    </changeSet>
+
+    <changeSet id="003-011-account-details-us" author="carlos.netto">
+        <!--
+            US fiat account details:
+            - routing_number: 9-digit ABA routing transit number
+            - account_number: Bank account number (varies by institution)
+        -->
+        <createTable tableName="account_details_us" schemaName="accounts_schema">
+            <column name="account_id" type="UUID">
+                <constraints primaryKey="true"
+                    foreignKeyName="fk_us_details_account"
+                    referencedTableName="accounts"
+                    referencedTableSchemaName="accounts_schema"
+                    referencedColumnNames="id"/>
+            </column>
+            <column name="routing_number" type="CHAR(9)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="account_number" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <sql>
+            COMMENT ON COLUMN accounts_schema.account_details_us.routing_number IS
+            '9-digit ABA routing transit number';
+            COMMENT ON COLUMN accounts_schema.account_details_us.account_number IS
+            'Bank account number (length varies by institution)';
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

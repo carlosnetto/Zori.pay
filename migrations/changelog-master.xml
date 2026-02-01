@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    =====================================================================
+    Zori.pay Database Migration Master Changelog
+    =====================================================================
+
+    Multi-country banking platform with blockchain integration.
+
+    SCHEMAS:
+    - registration_schema: Identity (people, contacts, addresses, documents)
+    - accounts_schema: Financial (accounts, currencies, blockchain wallets)
+    - audit_schema: Compliance and audit trails
+
+    MIGRATION SEQUENCE:
+    v001: Database schemas and extensions
+    v002: Registration/identity tables (people, contacts, addresses, documents)
+    v003: Account structure (holders, accounts, banking details)
+    v004: Audit trail (people_history)
+    v005: Blockchain wallets (HD wallet support)
+    v006: Reference data (countries, states, currencies, blockchains)
+    v007: Test data (Carlos Netto - can be excluded from production)
+    =====================================================================
+-->
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <!-- Infrastructure -->
+    <include file="v001_schemas.xml" relativeToChangelogFile="true"/>
+
+    <!-- Identity and Registration -->
+    <include file="v002_registration.xml" relativeToChangelogFile="true"/>
+
+    <!-- Financial Accounts -->
+    <include file="v003_accounts.xml" relativeToChangelogFile="true"/>
+
+    <!-- Audit Trail -->
+    <include file="v004_audit.xml" relativeToChangelogFile="true"/>
+
+    <!-- Blockchain Wallets -->
+    <include file="v005_blockchain_wallets.xml" relativeToChangelogFile="true"/>
+
+    <!-- Reference Data -->
+    <include file="v006_seed_reference_data.xml" relativeToChangelogFile="true"/>
+
+    <!-- Test Data (exclude from production if needed) -->
+    <include file="v007_seed_test_data.xml" relativeToChangelogFile="true"/>
+
+</databaseChangeLog>
