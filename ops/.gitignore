@@ -1,0 +1,5 @@
+# Python virtual environment
+venv/
+
+# Parquet backup folders
+*parquet_backup/
