@@ -3,3 +3,4 @@ venv/
 
 # Parquet backup folders
 *parquet_backup/
+*pg_backup/

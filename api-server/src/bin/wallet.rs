@@ -56,6 +56,7 @@ struct AddressInfo {
     derivation_path: String,
     blockchain_code: String,
     has_encrypted_seed: bool,
+    owner_name: String,
 }
 
 #[derive(Debug)]
@@ -135,7 +136,7 @@ async fn main() -> Result<()> {
 
     println!("Connected to database\n");
 
-    // Query for the address
+    // Query for the address and owner
     let result = sqlx::query(
         r#"
         SELECT
@@ -146,10 +147,15 @@ async fn main() -> Result<()> {
             wallet.blockchain_code,
             wallet.encrypted_master_seed IS NOT NULL
                 AND wallet.encryption_key_id != 'PLACEHOLDER_TO_BE_UPDATED'
-                AS has_encrypted_seed
+                AS has_encrypted_seed,
+            p.full_name AS owner_name
         FROM accounts_schema.account_blockchain_addresses addr
         INNER JOIN accounts_schema.account_blockchain wallet
             ON wallet.id = addr.account_blockchain_id
+        INNER JOIN accounts_schema.account_holders ah
+            ON ah.id = wallet.account_holder_id
+        INNER JOIN registration_schema.people p
+            ON p.id = ah.main_person_id
         WHERE LOWER(addr.public_address) = LOWER($1)
         "#,
     )
@@ -167,14 +173,38 @@ async fn main() -> Result<()> {
                 derivation_path: row.get("derivation_path"),
                 blockchain_code: row.get("blockchain_code"),
                 has_encrypted_seed: row.get("has_encrypted_seed"),
+                owner_name: row.get("owner_name"),
             };
 
             println!("Address found in database:");
+            println!("   Owner:           {}", info.owner_name);
             println!("   Address ID:      {}", info.address_id);
             println!("   Wallet ID:       {}", info.wallet_id);
             println!("   Public Address:  {}", info.public_address);
             println!("   Derivation Path: {}", info.derivation_path);
             println!("   Blockchain:      {}", info.blockchain_code);
+            println!();
+
+            // Confirm operation with owner name
+            let operation_desc = match command {
+                Command::Import12Words => "IMPORT a 12-word mnemonic",
+                Command::ImportPrivateKey => "IMPORT a private key",
+                Command::NewWallet => "GENERATE a new wallet",
+            };
+
+            println!("You are about to {} for:", operation_desc);
+            println!("   Owner: {}", info.owner_name);
+            println!("   Address: {}", info.public_address);
+            println!();
+            print!("Type 'yes' to confirm: ");
+            io::stdout().flush()?;
+
+            let mut confirm_input = String::new();
+            io::stdin().read_line(&mut confirm_input)?;
+            if confirm_input.trim().to_lowercase() != "yes" {
+                println!("\nAborted.");
+                return Ok(());
+            }
             println!();
 
             match command {
@@ -195,7 +225,7 @@ async fn main() -> Result<()> {
                         println!();
                         print!("WARNING: This will REPLACE the existing wallet with a new one!\n");
                         print!("         The old private key will be lost forever.\n");
-                        print!("         Type 'yes' to confirm: ");
+                        print!("         Type 'yes' to confirm replacement: ");
                         io::stdout().flush()?;
 
                         let mut input = String::new();
