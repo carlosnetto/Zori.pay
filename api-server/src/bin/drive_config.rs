@@ -53,6 +53,8 @@ pub struct StoredToken {
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    dotenvy::dotenv().ok();
+
     println!("🔧 Google Drive Configuration Tool");
     println!("===================================\n");
 
