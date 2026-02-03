@@ -147,6 +147,60 @@ Zori.pay/
 
 ---
 
+## Docker & Database Quick Reference
+
+### Docker Container
+```bash
+# Container name: global_banking_db
+# Run psql:
+docker exec -i global_banking_db psql -U admin -d banking_system -c "SELECT ..."
+```
+
+### Connection Details
+| Setting | Value |
+|---------|-------|
+| Container | `global_banking_db` |
+| User | `admin` |
+| Password | `mysecretpassword` |
+| Database | `banking_system` |
+| Port | `5432` |
+
+### Key Table Columns (for queries)
+
+```sql
+-- registration_schema.people
+id, full_name, date_of_birth, mother_name, birth_city, birth_country
+
+-- registration_schema.emails
+id, email_address
+
+-- registration_schema.person_emails
+person_id, email_id
+
+-- accounts_schema.account_holders
+id, main_person_id, created_at
+
+-- accounts_schema.account_blockchain
+id, account_holder_id, blockchain_code, encrypted_master_seed, encryption_iv, encryption_auth_tag, encryption_key_id
+
+-- accounts_schema.account_blockchain_addresses
+id, account_blockchain_id, public_address, derivation_path, address_index, is_active, is_primary
+```
+
+### Common Query: Find wallet owner
+```sql
+SELECT p.full_name, e.email_address, addr.public_address, w.blockchain_code
+FROM accounts_schema.account_blockchain_addresses addr
+JOIN accounts_schema.account_blockchain w ON w.id = addr.account_blockchain_id
+JOIN accounts_schema.account_holders ah ON ah.id = w.account_holder_id
+JOIN registration_schema.people p ON p.id = ah.main_person_id
+LEFT JOIN registration_schema.person_emails pe ON pe.person_id = p.id
+LEFT JOIN registration_schema.emails e ON e.id = pe.email_id
+WHERE LOWER(addr.public_address) = LOWER('0x...')
+```
+
+---
+
 ## Database Schemas
 
 | Schema | Purpose |
@@ -157,9 +211,9 @@ Zori.pay/
 
 ### Key Tables
 
-- `people` - User identity records
+- `people` - User identity records (`full_name`, not first/last)
 - `person_documents_br` - Brazilian KYC documents (CPF, etc.)
-- `account_holders` - Links people to financial accounts
+- `account_holders` - Links people to financial accounts (`main_person_id`)
 - `accounts` - Currency accounts (BRL1, USDC, USDT, etc.)
 - `account_blockchain` - HD wallet seeds (encrypted)
 - `account_blockchain_addresses` - Derived wallet addresses
