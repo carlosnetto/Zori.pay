@@ -1,0 +1,7 @@
+{
+  "name": "Zori - Pay Like a Local",
+  "description": "A cross-border payment wallet that allows travelers to pay via local QR systems like Pix and UPI using digital currencies.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

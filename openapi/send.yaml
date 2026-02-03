@@ -1,0 +1,255 @@
+openapi: 3.1.0
+info:
+  title: Zori.pay Send API
+  description: |
+    Endpoints for sending cryptocurrency transactions on Polygon network.
+
+    ## Supported Currencies
+    - **POL** - Native Polygon token (for gas fees)
+    - **USDC** - USD Coin stablecoin
+    - **USDT** - Tether stablecoin
+    - **BRL1** - Brazilian Real stablecoin
+
+    ## Transaction Flow
+    1. (Optional) Call `/send/estimate` to get gas fee estimate and max sendable amount
+    2. Call `/send` with destination address, amount, and currency
+    3. Server signs and broadcasts transaction to Polygon network
+    4. Returns transaction hash for tracking
+  version: 1.0.0
+  contact:
+    name: Carlos Augusto Leite Netto
+    email: carlos.netto@gmail.com
+
+servers:
+  - url: https://api.zori.pay/v1
+    description: Production
+  - url: https://sandbox.api.zori.pay/v1
+    description: Sandbox
+
+tags:
+  - name: Send
+    description: Transaction sending endpoints
+
+paths:
+  /send:
+    post:
+      operationId: sendTransaction
+      summary: Send cryptocurrency
+      description: |
+        Sends cryptocurrency to a destination address on Polygon network.
+
+        **Important:**
+        - You need POL in your wallet to pay for gas fees, even when sending ERC20 tokens.
+        - Transactions are irreversible. Verify the destination address carefully.
+      tags:
+        - Send
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendRequest'
+      responses:
+        '200':
+          description: Transaction sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendResponse'
+        '400':
+          description: Validation error (invalid address, amount, or insufficient balance)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalidAddress:
+                  summary: Invalid address
+                  value:
+                    error: "Invalid destination address"
+                insufficientGas:
+                  summary: Insufficient gas
+                  value:
+                    error: "Insufficient POL for gas fees. You need at least 0.01 POL to pay for transaction fees."
+                insufficientBalance:
+                  summary: Insufficient balance
+                  value:
+                    error: "Insufficient USDC balance"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /send/estimate:
+    post:
+      operationId: estimateTransaction
+      summary: Estimate transaction cost
+      description: |
+        Estimates the gas fee for a transaction and calculates the maximum sendable amount.
+
+        For POL (native token), the max amount accounts for gas fees.
+        For ERC20 tokens, returns the full token balance (gas is paid in POL).
+      tags:
+        - Send
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EstimateRequest'
+      responses:
+        '200':
+          description: Estimate calculated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EstimateResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Access token from authentication flow
+
+  schemas:
+    SendRequest:
+      type: object
+      required:
+        - to_address
+        - amount
+        - currency_code
+      properties:
+        to_address:
+          type: string
+          pattern: "^0x[a-fA-F0-9]{40}$"
+          description: Destination Polygon address
+          example: "0xF766EDB5E3bEbC44098E2C6D06675e7Ba50C28c9"
+        amount:
+          type: string
+          description: Amount to send (decimal string)
+          example: "10.5"
+        currency_code:
+          type: string
+          enum: [POL, USDC, USDT, BRL1]
+          description: Currency to send
+          example: "USDC"
+
+    SendResponse:
+      type: object
+      required:
+        - success
+        - transaction_hash
+        - message
+      properties:
+        success:
+          type: boolean
+          description: Whether the transaction was sent successfully
+          example: true
+        transaction_hash:
+          type: string
+          description: Polygon transaction hash
+          example: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+        message:
+          type: string
+          description: Success message
+          example: "Successfully sent 10.5 USDC to 0xF766EDB5E3bEbC44098E2C6D06675e7Ba50C28c9"
+
+    EstimateRequest:
+      type: object
+      required:
+        - to_address
+        - amount
+        - currency_code
+      properties:
+        to_address:
+          type: string
+          pattern: "^0x[a-fA-F0-9]{40}$"
+          description: Destination Polygon address
+          example: "0xF766EDB5E3bEbC44098E2C6D06675e7Ba50C28c9"
+        amount:
+          type: string
+          description: Amount to send (can be "0" just to get max amount)
+          example: "0"
+        currency_code:
+          type: string
+          enum: [POL, USDC, USDT, BRL1]
+          description: Currency to send
+          example: "POL"
+
+    EstimateResponse:
+      type: object
+      required:
+        - estimated_gas
+        - gas_price
+        - estimated_fee
+        - estimated_fee_formatted
+        - max_amount
+        - max_amount_formatted
+      properties:
+        estimated_gas:
+          type: string
+          description: Estimated gas units
+          example: "21000"
+        gas_price:
+          type: string
+          description: Current gas price in wei
+          example: "30000000000"
+        estimated_fee:
+          type: string
+          description: Estimated fee in wei (with 20% buffer)
+          example: "756000000000000"
+        estimated_fee_formatted:
+          type: string
+          description: Formatted fee in POL (max 8 decimals)
+          example: "0.000756"
+        max_amount:
+          type: string
+          description: Maximum sendable amount in smallest unit
+          example: "1842689276679176930"
+        max_amount_formatted:
+          type: string
+          description: Formatted max amount (max 8 decimals)
+          example: "1.84268927"
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "Insufficient POL for gas fees"
+
+  responses:
+    Unauthorized:
+      description: Authentication required or token invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Invalid token"
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Internal error occurred"

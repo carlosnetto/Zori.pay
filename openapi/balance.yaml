@@ -1,0 +1,127 @@
+openapi: 3.1.0
+info:
+  title: Zori.pay Balance API
+  description: |
+    Endpoint to retrieve blockchain balances for authenticated users.
+  version: 1.0.0
+  contact:
+    name: Carlos Augusto Leite Netto
+    email: carlos.netto@gmail.com
+
+servers:
+  - url: https://api.zori.pay/v1
+    description: Production
+  - url: https://sandbox.api.zori.pay/v1
+    description: Sandbox
+
+tags:
+  - name: Balance
+    description: Balance retrieval endpoints
+
+paths:
+  /balance:
+    get:
+      operationId: getBalances
+      summary: Get blockchain balances
+      description: |
+        Retrieves all token balances for the authenticated user's Polygon wallet.
+        Returns balances for POL (native), USDC, USDT, and BRL1.
+      tags:
+        - Balance
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Balances retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Access token from authentication flow
+
+  schemas:
+    BalanceResponse:
+      type: object
+      required:
+        - address
+        - blockchain
+        - balances
+      properties:
+        address:
+          type: string
+          description: User's blockchain wallet address
+          example: "0x3ce7f76c5465858328b8da6b28aa7af0cc54bc68"
+        blockchain:
+          type: string
+          description: Blockchain network
+          example: "POLYGON"
+        balances:
+          type: array
+          description: List of token balances
+          items:
+            $ref: '#/components/schemas/CurrencyBalance'
+
+    CurrencyBalance:
+      type: object
+      required:
+        - currency_code
+        - balance
+        - decimals
+        - formatted_balance
+      properties:
+        currency_code:
+          type: string
+          description: Currency identifier
+          example: "USDC"
+        balance:
+          type: string
+          description: Raw balance in smallest unit (wei)
+          example: "1000000000000000000"
+        decimals:
+          type: integer
+          description: Token decimals
+          example: 18
+        formatted_balance:
+          type: string
+          description: Human-readable formatted balance
+          example: "1.00"
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "Invalid token"
+
+  responses:
+    Unauthorized:
+      description: Authentication required or token invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Invalid token"
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Internal error occurred"

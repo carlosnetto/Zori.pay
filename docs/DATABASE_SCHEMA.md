@@ -7,6 +7,9 @@ Comprehensive documentation of the Zori.pay database architecture.
 1. [Schema Overview](#schema-overview)
 2. [Entity Relationships](#entity-relationships)
 3. [Identity Domain](#identity-domain)
+   - People, Contacts, Addresses, Documents
+   - Passkey Credentials (WebAuthn)
+   - Reference Tables (Countries, States)
 4. [Financial Domain](#financial-domain)
 5. [Blockchain Domain](#blockchain-domain)
 6. [Currency System](#currency-system)
@@ -241,6 +244,49 @@ Generic document table for international users.
 | `national_id_expiry` | DATE | National ID expiration |
 
 **Constraint**: One document set per person per country (unique index on `person_id + country_code`).
+
+### Passkey Credentials (WebAuthn)
+
+**`passkey_credentials`** - WebAuthn/FIDO2 passkey storage for passwordless authentication
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | UUID | Primary key |
+| `person_id` | UUID | FK to people |
+| `credential_id` | BYTEA | WebAuthn credential ID (unique) |
+| `public_key` | BYTEA | COSE public key |
+| `counter` | INTEGER | Signature counter (replay protection) |
+| `transports` | TEXT[] | Allowed transports (usb, nfc, ble, internal) |
+| `label` | VARCHAR(100) | User-friendly device name |
+| `is_active` | BOOLEAN | Can be used for authentication |
+| `created_at` | TIMESTAMP | When passkey was registered |
+| `last_used_at` | TIMESTAMP | Last successful authentication |
+
+### Reference Tables
+
+#### Countries (`registration_schema.countries`)
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `iso_code` | CHAR(2) | ISO 3166-1 alpha-2 code (PK) |
+| `name` | VARCHAR(100) | Country name |
+
+#### States (`registration_schema.states`)
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `country_code` | CHAR(2) | FK to countries |
+| `state_code` | VARCHAR(10) | State/province code |
+| `name` | VARCHAR(100) | State name |
+
+**Primary Key**: Composite (`country_code`, `state_code`)
+
+#### Address Types (`registration_schema.address_types`)
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `code` | VARCHAR(20) | Type code (PK): home, work, mailing, other |
+| `description` | VARCHAR(100) | Human-readable description |
 
 ---
 

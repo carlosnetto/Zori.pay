@@ -205,9 +205,8 @@
         <insert tableName="currencies" schemaName="accounts_schema">
             <column name="code" value="EURC"/><column name="name" value="Euro Coin"/><column name="asset_type_code" value="stablecoin"/><column name="decimals" valueNumeric="6"/>
         </insert>
-        <!-- PYUSD has variable decimals per chain -->
         <insert tableName="currencies" schemaName="accounts_schema">
-            <column name="code" value="PYUSD"/><column name="name" value="PayPal USD"/><column name="asset_type_code" value="stablecoin"/>
+            <column name="code" value="PYUSD"/><column name="name" value="PayPal USD"/><column name="asset_type_code" value="stablecoin"/><column name="decimals" valueNumeric="6"/>
         </insert>
         <!-- Brazilian Stablecoins -->
         <insert tableName="currencies" schemaName="accounts_schema">
@@ -329,11 +328,15 @@
             INSERT INTO accounts_schema.currency_blockchain_configs (currency_id, blockchain_code, contract_address)
             SELECT c.id, 'POLYGON', '0x8f3cf7ad23cd3cadbd9735aff958023239c6a063' FROM accounts_schema.currencies c WHERE c.code = 'DAI';
 
-            -- PYUSD (variable decimals)
-            INSERT INTO accounts_schema.currency_blockchain_configs (currency_id, blockchain_code, network_decimals, contract_address)
-            SELECT c.id, 'ETHEREUM', 6, '0x6c3ea9036406852006290770BEdFcAbA0e23A0e8' FROM accounts_schema.currencies c WHERE c.code = 'PYUSD';
-            INSERT INTO accounts_schema.currency_blockchain_configs (currency_id, blockchain_code, network_decimals, contract_address)
-            SELECT c.id, 'SOLANA', 6, '2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo' FROM accounts_schema.currencies c WHERE c.code = 'PYUSD';
+            -- PYUSD
+            INSERT INTO accounts_schema.currency_blockchain_configs (currency_id, blockchain_code, contract_address)
+            SELECT c.id, 'ETHEREUM', '0x6c3ea9036406852006290770BEdFcAbA0e23A0e8' FROM accounts_schema.currencies c WHERE c.code = 'PYUSD';
+            INSERT INTO accounts_schema.currency_blockchain_configs (currency_id, blockchain_code, contract_address)
+            SELECT c.id, 'SOLANA', '2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo' FROM accounts_schema.currencies c WHERE c.code = 'PYUSD';
+
+            -- BRL1 (Brazilian Real stablecoin) - uses 18 decimals on Polygon (ERC20 standard)
+            INSERT INTO accounts_schema.currency_blockchain_configs (currency_id, blockchain_code, contract_address, network_decimals)
+            SELECT c.id, 'POLYGON', '0x5c067c80c00ecd2345b05e83a3e758ef799c40b5', 18 FROM accounts_schema.currencies c WHERE c.code = 'BRL1';
 
             -- Native assets
             INSERT INTO accounts_schema.currency_blockchain_configs (currency_id, blockchain_code)
@@ -346,8 +349,6 @@
             SELECT c.id, 'BNB' FROM accounts_schema.currencies c WHERE c.code = 'BNB';
             INSERT INTO accounts_schema.currency_blockchain_configs (currency_id, blockchain_code)
             SELECT c.id, 'AVALANCHE' FROM accounts_schema.currencies c WHERE c.code = 'AVAX';
-            INSERT INTO accounts_schema.currency_blockchain_configs (currency_id, blockchain_code)
-            SELECT c.id, 'POLYGON' FROM accounts_schema.currencies c WHERE c.code = 'BRL1';
         </sql>
     </changeSet>
 

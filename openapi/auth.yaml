@@ -1,0 +1,452 @@
+openapi: 3.1.0
+info:
+  title: Zori.pay Authentication API
+  description: |
+    Authentication endpoints for Zori.pay platform.
+
+    ## Login Flow
+    1. Client initiates Google OAuth via `/auth/google`
+    2. User authenticates with Google
+    3. Client sends Google ID token to `/auth/google/callback`
+    4. Server validates Google token, returns intermediate auth token
+    5. Client requests passkey challenge via `/auth/passkey/challenge`
+    6. Client signs challenge with passkey
+    7. Client sends signed response to `/auth/passkey/verify`
+    8. Server returns final access/refresh tokens
+  version: 1.0.0
+  contact:
+    name: Carlos Augusto Leite Netto
+    email: carlos.netto@gmail.com
+
+servers:
+  - url: https://api.zori.pay/v1
+    description: Production
+  - url: https://sandbox.api.zori.pay/v1
+    description: Sandbox
+
+tags:
+  - name: Google OAuth
+    description: Google authentication endpoints
+  - name: Passkey
+    description: WebAuthn passkey verification
+
+paths:
+  /auth/google:
+    post:
+      operationId: initiateGoogleAuth
+      summary: Initiate Google OAuth flow
+      description: |
+        Returns the Google OAuth authorization URL.
+        Client should redirect user to this URL to authenticate with Google.
+      tags:
+        - Google OAuth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - redirect_uri
+              properties:
+                redirect_uri:
+                  type: string
+                  format: uri
+                  description: Client callback URL after Google auth
+                  example: "https://app.zori.pay/auth/callback"
+      responses:
+        '200':
+          description: OAuth authorization URL generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoogleAuthInitResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /auth/google/callback:
+    post:
+      operationId: handleGoogleCallback
+      summary: Exchange Google authorization code for intermediate token
+      description: |
+        Validates the Google authorization code and returns an intermediate
+        authentication token. This token is NOT a full access token - it
+        requires passkey verification to complete the login flow.
+      tags:
+        - Google OAuth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - code
+                - redirect_uri
+              properties:
+                code:
+                  type: string
+                  description: Authorization code from Google OAuth callback
+                  example: "4/0AX4XfWh..."
+                redirect_uri:
+                  type: string
+                  format: uri
+                  description: Must match the redirect_uri used in /auth/google
+                  example: "https://app.zori.pay/auth/callback"
+      responses:
+        '200':
+          description: Google authentication successful, passkey verification required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoogleCallbackResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: Invalid or expired authorization code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: User not found (email not registered)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: USER_NOT_FOUND
+                message: "No account found for this email"
+
+  /auth/passkey/challenge:
+    post:
+      operationId: requestPasskeyChallenge
+      summary: Request a passkey authentication challenge
+      description: |
+        Generates a WebAuthn authentication challenge for the user.
+        Requires a valid intermediate token from Google OAuth.
+      tags:
+        - Passkey
+      security:
+        - intermediateToken: []
+      responses:
+        '200':
+          description: Challenge generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasskeyChallengeResponse'
+        '401':
+          description: Invalid or expired intermediate token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/passkey/verify:
+    post:
+      operationId: verifyPasskey
+      summary: Verify passkey signature and complete login
+      description: |
+        Verifies the signed WebAuthn challenge and completes the authentication.
+        Returns access and refresh tokens upon successful verification.
+      tags:
+        - Passkey
+      security:
+        - intermediateToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasskeyVerifyRequest'
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokenResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: Invalid passkey signature or expired challenge
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/refresh:
+    post:
+      operationId: refreshToken
+      summary: Refresh access token
+      description: Exchange a valid refresh token for a new access token.
+      tags:
+        - Passkey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refresh_token
+              properties:
+                refresh_token:
+                  type: string
+                  description: Valid refresh token
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokenResponse'
+        '401':
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/logout:
+    post:
+      operationId: logout
+      summary: Invalidate current session
+      description: Revokes the current access and refresh tokens.
+      tags:
+        - Passkey
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Logged out successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Final access token after complete authentication
+    intermediateToken:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Intermediate token after Google OAuth (requires passkey to complete)
+
+  schemas:
+    GoogleAuthInitResponse:
+      type: object
+      required:
+        - authorization_url
+        - state
+      properties:
+        authorization_url:
+          type: string
+          format: uri
+          description: URL to redirect user for Google authentication
+          example: "https://accounts.google.com/o/oauth2/v2/auth?client_id=..."
+        state:
+          type: string
+          description: CSRF protection state parameter
+          example: "abc123xyz"
+
+    GoogleCallbackResponse:
+      type: object
+      required:
+        - intermediate_token
+        - expires_in
+        - user
+      properties:
+        intermediate_token:
+          type: string
+          description: |
+            JWT token valid only for passkey verification.
+            Must be exchanged for access token via /auth/passkey/verify.
+          example: "eyJhbGciOiJSUzI1NiIs..."
+        expires_in:
+          type: integer
+          description: Token validity in seconds (short-lived, ~5 minutes)
+          example: 300
+        user:
+          $ref: '#/components/schemas/UserBasicInfo'
+
+    UserBasicInfo:
+      type: object
+      required:
+        - person_id
+        - email
+        - display_name
+      properties:
+        person_id:
+          type: string
+          format: uuid
+          description: Unique person identifier
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        email:
+          type: string
+          format: email
+          example: "carlos.netto@gmail.com"
+        display_name:
+          type: string
+          example: "Carlos Augusto Leite Netto"
+        avatar_url:
+          type: string
+          format: uri
+          nullable: true
+          description: Google profile picture URL
+          example: "https://lh3.googleusercontent.com/a/..."
+
+    PasskeyChallengeResponse:
+      type: object
+      required:
+        - challenge
+        - timeout
+        - rp_id
+        - user_verification
+        - allowed_credentials
+      properties:
+        challenge:
+          type: string
+          format: byte
+          description: Base64URL-encoded random challenge
+          example: "dGVzdC1jaGFsbGVuZ2U..."
+        timeout:
+          type: integer
+          description: Challenge timeout in milliseconds
+          example: 60000
+        rp_id:
+          type: string
+          description: Relying party identifier
+          example: "zori.pay"
+        user_verification:
+          type: string
+          enum: [required, preferred, discouraged]
+          description: User verification requirement
+          example: "required"
+        allowed_credentials:
+          type: array
+          description: List of credential IDs registered for this user
+          items:
+            type: object
+            required:
+              - type
+              - id
+            properties:
+              type:
+                type: string
+                enum: [public-key]
+              id:
+                type: string
+                format: byte
+                description: Base64URL-encoded credential ID
+              transports:
+                type: array
+                items:
+                  type: string
+                  enum: [usb, nfc, ble, internal, hybrid]
+
+    PasskeyVerifyRequest:
+      type: object
+      required:
+        - credential_id
+        - authenticator_data
+        - client_data_json
+        - signature
+      properties:
+        credential_id:
+          type: string
+          format: byte
+          description: Base64URL-encoded credential ID
+          example: "Y3JlZGVudGlhbC1pZC4uLg..."
+        authenticator_data:
+          type: string
+          format: byte
+          description: Base64URL-encoded authenticator data
+          example: "YXV0aGVudGljYXRvci1kYXRh..."
+        client_data_json:
+          type: string
+          format: byte
+          description: Base64URL-encoded client data JSON
+          example: "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0Ii..."
+        signature:
+          type: string
+          format: byte
+          description: Base64URL-encoded signature
+          example: "c2lnbmF0dXJlLi4u..."
+        user_handle:
+          type: string
+          format: byte
+          nullable: true
+          description: Base64URL-encoded user handle (optional)
+
+    AuthTokenResponse:
+      type: object
+      required:
+        - access_token
+        - refresh_token
+        - token_type
+        - expires_in
+      properties:
+        access_token:
+          type: string
+          description: JWT access token for API calls
+          example: "eyJhbGciOiJSUzI1NiIs..."
+        refresh_token:
+          type: string
+          description: Token to obtain new access tokens
+          example: "dGhpcy1pcy1hLXJlZnJlc2gtdG9rZW4..."
+        token_type:
+          type: string
+          enum: [Bearer]
+          example: "Bearer"
+        expires_in:
+          type: integer
+          description: Access token validity in seconds
+          example: 3600
+
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Machine-readable error code
+          example: "INVALID_TOKEN"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "The provided token is invalid or expired"
+        details:
+          type: object
+          additionalProperties: true
+          description: Additional error context
+
+  responses:
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: VALIDATION_ERROR
+            message: "Invalid request body"
+            details:
+              field: "redirect_uri"
+              reason: "Must be a valid URI"
+
+    Unauthorized:
+      description: Authentication required or token invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: UNAUTHORIZED
+            message: "Authentication required"

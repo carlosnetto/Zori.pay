@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zori.pay - Login Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+        button {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #357ae8;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .status.info { background: #e3f2fd; color: #1565c0; }
+        .status.success { background: #e8f5e9; color: #2e7d32; }
+        .status.error { background: #ffebee; color: #c62828; }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .step {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 3px solid #4285f4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Zori.pay Login Test</h1>
+
+        <div class="step">
+            <strong>Step 1:</strong> Google OAuth
+            <button id="startLogin" onclick="startGoogleLogin()">
+                Sign in with Google
+            </button>
+        </div>
+
+        <div class="step" style="display:none" id="step2">
+            <strong>Step 2:</strong> Passkey Verification
+            <button id="verifyPasskey" onclick="verifyPasskey()" disabled>
+                Verify with Passkey
+            </button>
+        </div>
+
+        <div id="status"></div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/v1';
+        let intermediateToken = null;
+        let challenge = null;
+
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status ${type}`;
+            statusDiv.innerHTML = message;
+        }
+
+        function showResult(data) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        }
+
+        async function startGoogleLogin() {
+            try {
+                showStatus('Initiating Google OAuth...', 'info');
+
+                // Step 1: Get Google OAuth URL
+                const response = await fetch(`${API_BASE}/auth/google`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        redirect_uri: 'http://localhost:8080/auth/callback'
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+                }
+
+                const data = await response.json();
+                showResult(data);
+
+                // Redirect to Google
+                showStatus('Redirecting to Google...', 'info');
+                window.location.href = data.authorization_url;
+
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        async function handleCallback() {
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get('code');
+            const state = params.get('state');
+
+            if (!code) return;
+
+            try {
+                showStatus('Exchanging authorization code...', 'info');
+
+                const response = await fetch(`${API_BASE}/auth/google/callback`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        code: code,
+                        redirect_uri: 'http://localhost:8080/auth/callback'
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Failed to exchange code');
+                }
+
+                const data = await response.json();
+                intermediateToken = data.intermediate_token;
+
+                showStatus(`✓ Google authentication successful!<br>User: ${data.user.display_name}<br>Email: ${data.user.email}`, 'success');
+                showResult(data);
+
+                // Show step 2
+                document.getElementById('step2').style.display = 'block';
+                document.getElementById('verifyPasskey').disabled = false;
+
+                // Clear URL params
+                window.history.replaceState({}, document.title, window.location.pathname);
+
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        async function verifyPasskey() {
+            try {
+                showStatus('Requesting passkey challenge...', 'info');
+
+                // Get challenge
+                const challengeResponse = await fetch(`${API_BASE}/auth/passkey/challenge`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${intermediateToken}`
+                    }
+                });
+
+                if (!challengeResponse.ok) {
+                    throw new Error('Failed to get challenge');
+                }
+
+                challenge = await challengeResponse.json();
+                showStatus('Challenge received. Note: Passkey verification requires a real WebAuthn setup.<br>For testing, the placeholder passkey in the database won\'t work with browser WebAuthn API.', 'info');
+                showResult(challenge);
+
+                // In production, you would:
+                // const credential = await navigator.credentials.get({
+                //     publicKey: {
+                //         challenge: base64UrlDecode(challenge.challenge),
+                //         allowCredentials: challenge.allowed_credentials.map(c => ({
+                //             type: c.type,
+                //             id: base64UrlDecode(c.id),
+                //             transports: c.transports
+                //         })),
+                //         userVerification: challenge.user_verification,
+                //         timeout: challenge.timeout
+                //     }
+                // });
+
+                showStatus('⚠️ Passkey verification requires actual WebAuthn credentials. The test passkey in the database is a placeholder and cannot be used for real authentication.', 'info');
+
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        // Check if we're returning from Google OAuth
+        window.onload = handleCallback;
+    </script>
+</body>
+</html>

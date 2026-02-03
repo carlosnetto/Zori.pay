@@ -25,10 +25,14 @@
     - person_documents_us: US docs (SSN, driver's license)
     - person_documents_etc: Generic/passport for other countries
 
+    AUTHENTICATION:
+    - passkey_credentials: WebAuthn/FIDO2 passwordless login
+
     DESIGN PRINCIPLES:
     - Phones/emails normalized (stored once, referenced many times)
     - Login credentials: partial unique index ensures one-person-per-login
     - Multi-country support with country-specific document tables
+    - Monetary amounts stored as BIGINT in smallest currency unit (centavos)
     =====================================================================
 -->
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
@@ -335,7 +339,7 @@
             </column>
             <column name="profession" type="VARCHAR(100)"/>
             <column name="employer_name" type="VARCHAR(200)"/>
-            <column name="monthly_income_brl" type="DECIMAL(15,2)"/>
+            <column name="monthly_income_brl" type="BIGINT"/> <!-- Stored in centavos (smallest unit) -->
             <column name="is_pep" type="BOOLEAN" defaultValueBoolean="false"/>
             <column name="pep_details" type="TEXT"/>
             <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP"/>
@@ -456,6 +460,54 @@
             tableName="person_documents_etc">
             <column name="passport_number"/>
             <column name="passport_country_issuer"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- ==================== WebAuthn Passkey Credentials ==================== -->
+    <changeSet id="002-015-passkey-credentials" author="carlos.netto">
+        <!--
+            WebAuthn/FIDO2 passkey credentials for passwordless authentication.
+            Each person can have multiple passkeys (phone, laptop, security key).
+
+            SECURITY:
+            - public_key: COSE-encoded public key (safe to store)
+            - counter: Signature counter for replay attack detection
+        -->
+        <createTable tableName="passkey_credentials" schemaName="registration_schema">
+            <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="person_id" type="UUID">
+                <constraints nullable="false"
+                    foreignKeyName="fk_passkey_person"
+                    referencedTableName="people"
+                    referencedTableSchemaName="registration_schema"
+                    referencedColumnNames="id"/>
+            </column>
+            <column name="credential_id" type="BYTEA">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="public_key" type="BYTEA">
+                <constraints nullable="false"/>
+            </column>
+            <column name="counter" type="INTEGER" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="transports" type="TEXT[]"/>
+            <column name="label" type="VARCHAR(100)"/>
+            <column name="is_active" type="BOOLEAN" defaultValueBoolean="true"/>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="last_used_at" type="TIMESTAMP WITH TIME ZONE"/>
+        </createTable>
+
+        <createIndex indexName="idx_passkey_person" schemaName="registration_schema"
+            tableName="passkey_credentials">
+            <column name="person_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_passkey_credential_id" schemaName="registration_schema"
+            tableName="passkey_credentials">
+            <column name="credential_id"/>
         </createIndex>
     </changeSet>
 

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 500 500" style="enable-background:new 0 0 500 500;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#009541;}
+	.st1{fill:#F6B200;}
+	.st2{fill:#FFFFFF;}
+</style>
+<circle class="st0" cx="250" cy="250" r="240"/>
+<circle class="st1" cx="250" cy="250" r="180"/>
+<path class="st2" d="M250,110L250,110c-77.3,0-140,62.7-140,140s62.7,140,140,140s140-62.7,140-140S327.3,110,250,110z M250,350
+	c-55.2,0-100-44.8-100-100s44.8-100,100-100s100,44.8,100,100S305.2,350,250,350z"/>
+<text transform="matrix(1 0 0 1 180 280)" style="fill:#FFFFFF; font-family:'Arial-BoldMT'; font-size:90px;">BRL1</text>
+</svg>

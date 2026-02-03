@@ -1,0 +1,93 @@
+openapi: 3.1.0
+info:
+  title: Zori.pay Receive API
+  description: |
+    Endpoint to retrieve the user's blockchain address for receiving funds.
+  version: 1.0.0
+  contact:
+    name: Carlos Augusto Leite Netto
+    email: carlos.netto@gmail.com
+
+servers:
+  - url: https://api.zori.pay/v1
+    description: Production
+  - url: https://sandbox.api.zori.pay/v1
+    description: Sandbox
+
+tags:
+  - name: Receive
+    description: Receive address endpoints
+
+paths:
+  /receive:
+    get:
+      operationId: getReceiveAddress
+      summary: Get receive address
+      description: |
+        Returns the user's primary blockchain address for receiving funds.
+        Currently supports Polygon network only.
+      tags:
+        - Receive
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Receive address retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReceiveAddressResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: No blockchain address found for user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "No blockchain address found for user"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Access token from authentication flow
+
+  schemas:
+    ReceiveAddressResponse:
+      type: object
+      required:
+        - blockchain
+        - address
+      properties:
+        blockchain:
+          type: string
+          description: Blockchain network name
+          example: "POLYGON"
+        address:
+          type: string
+          description: Public wallet address for receiving funds
+          example: "0x3ce7f76c5465858328b8da6b28aa7af0cc54bc68"
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "Invalid token"
+
+  responses:
+    Unauthorized:
+      description: Authentication required or token invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Invalid token"

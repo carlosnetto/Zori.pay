@@ -1,0 +1,229 @@
+openapi: 3.1.0
+info:
+  title: Zori.pay KYC API
+  description: |
+    Know Your Customer (KYC) endpoints for account opening.
+
+    ## Brazilian Account Opening Flow
+    1. User submits personal information and documents via multipart form
+    2. Server validates CPF and creates identity records
+    3. Server generates HD wallet and derives Polygon address
+    4. Documents are uploaded to Google Drive asynchronously
+    5. Returns account holder ID and blockchain address
+
+    ## Required Documents
+    - **CNH** (Driver's License): Either PDF or front+back images
+    - **Selfie**: Photo of the user
+    - **Proof of Address**: Utility bill or bank statement
+  version: 1.0.0
+  contact:
+    name: Carlos Augusto Leite Netto
+    email: carlos.netto@gmail.com
+
+servers:
+  - url: https://api.zori.pay/v1
+    description: Production
+  - url: https://sandbox.api.zori.pay/v1
+    description: Sandbox
+
+tags:
+  - name: KYC
+    description: Account opening and KYC endpoints
+
+paths:
+  /kyc/open-account-br:
+    post:
+      operationId: openAccountBr
+      summary: Open Brazilian account
+      description: |
+        Opens a new account for a Brazilian user with KYC verification.
+
+        Creates:
+        - Person record with identity information
+        - Account holder linked to the person
+        - Polygon HD wallet with encrypted seed
+        - Currency accounts (BRL1, SOL, USDC, USDT)
+
+        Documents are uploaded to Google Drive in the background.
+      tags:
+        - KYC
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AccountOpeningBrRequest'
+            encoding:
+              cnh_pdf:
+                contentType: application/pdf
+              cnh_front:
+                contentType: image/jpeg, image/png
+              cnh_back:
+                contentType: image/jpeg, image/png
+              selfie:
+                contentType: image/jpeg, image/png
+              proof_of_address:
+                contentType: application/pdf, image/jpeg, image/png
+      responses:
+        '200':
+          description: Account created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountOpeningResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalidCpf:
+                  summary: Invalid CPF
+                  value:
+                    error: "Invalid CPF: Invalid checksum"
+                missingDocument:
+                  summary: Missing document
+                  value:
+                    error: "Missing required field: selfie"
+                invalidEmail:
+                  summary: Invalid email
+                  value:
+                    error: "Invalid email format"
+                invalidPhone:
+                  summary: Invalid phone
+                  value:
+                    error: "Invalid phone format. Must be E.164 format (+5511999999999)"
+        '409':
+          description: CPF already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "CPF already exists"
+        '413':
+          description: File too large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: "File selfie exceeds max size of 10 MB"
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  schemas:
+    AccountOpeningBrRequest:
+      type: object
+      required:
+        - full_name
+        - mother_name
+        - cpf
+        - email
+        - phone
+        - selfie
+        - proof_of_address
+      properties:
+        full_name:
+          type: string
+          description: Full legal name
+          example: "Carlos Augusto Leite Netto"
+        mother_name:
+          type: string
+          description: Mother's full name
+          example: "Maria Hortencia Leite Netto"
+        cpf:
+          type: string
+          pattern: "^[0-9]{11}$|^[0-9]{3}\\.[0-9]{3}\\.[0-9]{3}-[0-9]{2}$"
+          description: Brazilian CPF (with or without formatting)
+          example: "072.890.488-81"
+        email:
+          type: string
+          format: email
+          description: Primary email for login
+          example: "carlos.netto@gmail.com"
+        phone:
+          type: string
+          pattern: "^\\+[0-9]{10,15}$"
+          description: Phone number in E.164 format
+          example: "+5519993455780"
+        cnh_pdf:
+          type: string
+          format: binary
+          description: CNH document as PDF (alternative to front+back images)
+        cnh_front:
+          type: string
+          format: binary
+          description: Front of CNH document (required if cnh_pdf not provided)
+        cnh_back:
+          type: string
+          format: binary
+          description: Back of CNH document (required if cnh_pdf not provided)
+        selfie:
+          type: string
+          format: binary
+          description: User selfie photo
+        proof_of_address:
+          type: string
+          format: binary
+          description: Proof of address document (utility bill, bank statement)
+
+    AccountOpeningResponse:
+      type: object
+      required:
+        - success
+        - person_id
+        - account_holder_id
+        - polygon_address
+        - message
+        - documents_status
+      properties:
+        success:
+          type: boolean
+          description: Whether account was created successfully
+          example: true
+        person_id:
+          type: string
+          format: uuid
+          description: Unique person identifier
+          example: "8247d4e7-1ecc-4119-8dce-d90bb367891b"
+        account_holder_id:
+          type: string
+          format: uuid
+          description: Account holder identifier
+          example: "48f00784-e541-454f-8b5c-763d48cbf0e4"
+        polygon_address:
+          type: string
+          description: Generated Polygon wallet address
+          example: "0x3ce7f76c5465858328b8da6b28aa7af0cc54bc68"
+        message:
+          type: string
+          description: Success message
+          example: "Account created successfully"
+        documents_status:
+          type: string
+          enum: [processing, completed, failed]
+          description: Status of document upload to Google Drive
+          example: "processing"
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "Invalid CPF"
+
+  responses:
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Internal error occurred"

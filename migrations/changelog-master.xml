@@ -7,18 +7,25 @@
     Multi-country banking platform with blockchain integration.
 
     SCHEMAS:
-    - registration_schema: Identity (people, contacts, addresses, documents)
+    - registration_schema: Identity (people, contacts, addresses, documents, passkeys)
     - accounts_schema: Financial (accounts, currencies, blockchain wallets)
     - audit_schema: Compliance and audit trails
 
     MIGRATION SEQUENCE:
     v001: Database schemas and extensions
-    v002: Registration/identity tables (people, contacts, addresses, documents)
-    v003: Account structure (holders, accounts, banking details)
+    v002: Registration/identity tables (people, contacts, addresses, documents, passkeys)
+    v003: Account structure (holders, accounts, banking details, currency configs)
     v004: Audit trail (people_history)
     v005: Blockchain wallets (HD wallet support)
     v006: Reference data (countries, states, currencies, blockchains)
-    v007: Test data (Carlos Netto - can be excluded from production)
+
+    NOTE: v007 (test data) and v008 (family & friends) were removed.
+    Users are now onboarded via the KYC API, not migrations.
+
+    DESIGN PRINCIPLES:
+    - Monetary amounts stored as BIGINT in smallest currency unit
+    - Currency decimals required (NOT NULL)
+    - network_decimals only set when different from currency default
     =====================================================================
 -->
 <databaseChangeLog
@@ -44,8 +51,5 @@
 
     <!-- Reference Data -->
     <include file="v006_seed_reference_data.xml" relativeToChangelogFile="true"/>
-
-    <!-- Test Data (exclude from production if needed) -->
-    <include file="v007_seed_test_data.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

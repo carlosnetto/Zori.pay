@@ -1,0 +1,243 @@
+
+import React, { useState, useEffect } from 'react';
+import { Language, translations } from '../translations';
+import { CurrencySymbol, WalletBalance } from '../types';
+import { balanceService } from '../services/balance';
+import { transactionsService, Transaction } from '../services/transactions';
+
+interface DashboardProps {
+    currentLang: Language;
+}
+
+// Currency metadata (icons, colors, names)
+const CURRENCY_METADATA: Record<string, { name: string; color: string; icon: string }> = {
+    'BRL1': { name: 'Zori Real', color: 'bg-green-600', icon: '/images/brl1.png' },
+    'USDC': { name: 'Digital Dollar', color: 'bg-blue-600', icon: '/images/usdc.svg' },
+    'USDT': { name: 'Tether', color: 'bg-green-500', icon: '/images/usdt.svg' },
+    'ETH': { name: 'Ethereum', color: 'bg-indigo-600', icon: '/images/eth.svg' },
+    'POL': { name: 'Polygon', color: 'bg-purple-600', icon: '/images/pol.png' },
+};
+
+const ALL_TRANSACTIONS: Transaction[] = [
+    // BRL1
+    { id: 1, name: 'Starbucks São Paulo', amount: '-24,50', date: 'Today, 10:23 AM', icon: '☕', currency: 'BRL1', type: 'outgoing' },
+    { id: 2, name: 'Uber Moema', amount: '-45,90', date: 'Yesterday, 8:45 PM', icon: '🚗', currency: 'BRL1', type: 'outgoing' },
+    { id: 3, name: 'Receita Pix', amount: '+500,00', date: 'Feb 1, 2:00 PM', icon: '💰', currency: 'BRL1', type: 'incoming' },
+    // USDC
+    { id: 4, name: 'Apple Subscription', amount: '-14.99', date: 'Jan 30, 9:00 AM', icon: '🍏', currency: 'USDC', type: 'outgoing' },
+    { id: 5, name: 'Freelance Payment', amount: '+250.00', date: 'Jan 28, 4:30 PM', icon: '💸', currency: 'USDC', type: 'incoming' },
+    // ETH
+    { id: 6, name: 'OpenSea NFT Buy', amount: '-0.05', date: 'Jan 25, 11:00 PM', icon: '�️', currency: 'ETH', type: 'outgoing' },
+    // POL
+    { id: 7, name: 'Swap BRL1 > POL', amount: '+1,200.00', date: 'Jan 24, 10:00 AM', icon: '�💱', currency: 'POL', type: 'incoming' },
+];
+
+const Dashboard: React.FC<DashboardProps> = ({ currentLang }) => {
+    const t = translations[currentLang].dashboard;
+    const [activeCurrency, setActiveCurrency] = useState<CurrencySymbol>('POL');
+    const [balances, setBalances] = useState<WalletBalance[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    // Fetch balances on component mount
+    useEffect(() => {
+        const fetchBalances = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                const response = await balanceService.getBalances();
+
+                // Map API response to WalletBalance format
+                const walletBalances: WalletBalance[] = response.balances.map(balance => {
+                    const metadata = CURRENCY_METADATA[balance.currency_code] || {
+                        name: balance.currency_code,
+                        color: 'bg-gray-600',
+                        icon: '/images/default.png'
+                    };
+
+                    return {
+                        symbol: balance.currency_code as CurrencySymbol,
+                        name: metadata.name,
+                        balance: balance.formatted_balance,
+                        color: metadata.color,
+                        icon: metadata.icon
+                    };
+                });
+
+                setBalances(walletBalances);
+
+                // Set first available currency as active
+                if (walletBalances.length > 0) {
+                    setActiveCurrency(walletBalances[0].symbol);
+                }
+            } catch (err: any) {
+                console.error('Failed to fetch balances:', err);
+                setError(err.message || 'Failed to load balances');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchBalances();
+    }, []);
+
+    const activeWallet = balances.find(b => b.symbol === activeCurrency) || balances[0];
+
+    // Transactions temporarily disabled - API integration pending
+    const filteredTransactions: any[] = [];
+
+    // Loading state
+    if (loading) {
+        return (
+            <div className="pt-24 pb-12 max-w-lg mx-auto px-4 sm:px-6">
+                <div className="flex items-center justify-center min-h-[400px]">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                        <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">Loading balances...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Error state
+    if (error) {
+        return (
+            <div className="pt-24 pb-12 max-w-lg mx-auto px-4 sm:px-6">
+                <div className="flex items-center justify-center min-h-[400px]">
+                    <div className="text-center bg-red-50 p-8 rounded-3xl border border-red-100">
+                        <div className="text-4xl mb-4">⚠️</div>
+                        <p className="text-sm font-bold text-red-600 mb-2">Failed to load balances</p>
+                        <p className="text-xs text-gray-600">{error}</p>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="mt-4 px-6 py-2 bg-red-600 text-white text-sm font-bold rounded-full hover:bg-red-700"
+                        >
+                            Retry
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // No balances found
+    if (balances.length === 0) {
+        return (
+            <div className="pt-24 pb-12 max-w-lg mx-auto px-4 sm:px-6">
+                <div className="flex items-center justify-center min-h-[400px]">
+                    <div className="text-center">
+                        <div className="text-4xl mb-4 opacity-20">💰</div>
+                        <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">No balances found</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="pt-24 pb-12 max-w-lg mx-auto px-4 sm:px-6">
+            {/* Horizontal Currency Selector */}
+            <div className="flex space-x-3 mb-8 overflow-x-auto pb-2 scrollbar-hide no-scrollbar">
+                {balances.map((wallet) => (
+                    <button
+                        key={wallet.symbol}
+                        onClick={() => setActiveCurrency(wallet.symbol)}
+                        className={`
+              flex flex-col items-center justify-center w-20 h-20 rounded-2xl transition-all duration-300 border-2
+              ${activeCurrency === wallet.symbol
+                                ? `${wallet.color} border-transparent text-white shadow-lg scale-105 ring-4 ring-gray-100`
+                                : 'bg-white border-gray-100 text-gray-400 hover:border-gray-200'}
+            `}
+                    >
+                        <div className={`w-8 h-8 rounded-full overflow-hidden bg-white flex items-center justify-center mb-1 ${activeCurrency === wallet.symbol ? '' : 'grayscale opacity-60'}`}>
+                            <img src={wallet.icon} alt={wallet.symbol} className="w-full h-full object-cover" />
+                        </div>
+                        <span className="text-[9px] font-black uppercase tracking-tighter">{wallet.symbol}</span>
+                    </button>
+                ))}
+            </div>
+
+            {/* Main Balance Card */}
+            <div className={`relative overflow-hidden rounded-[2.5rem] p-8 text-white shadow-xl mb-10 transition-colors duration-500 ${activeWallet.color}`}>
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -translate-y-1/2 translate-x-1/3"></div>
+                <div className="relative z-10">
+                    <div className="flex items-center space-x-3 mb-2">
+                        <div className="w-8 h-8 rounded-full overflow-hidden bg-white">
+                            <img src={activeWallet.icon} alt={activeWallet.symbol} className="w-full h-full object-cover" />
+                        </div>
+                        <span className="text-sm font-medium opacity-80">{activeWallet.name}</span>
+                    </div>
+                    <div className="flex items-baseline space-x-2 mb-8">
+                        <span className="text-4xl md:text-5xl font-black tabular-nums">
+                            {activeWallet.balance}
+                        </span>
+                        <span className="text-lg font-bold opacity-60">{activeWallet.symbol}</span>
+                    </div>
+
+                    <div className="flex justify-between items-center max-w-xs">
+                        <button className="flex flex-col items-center space-y-2 group">
+                            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
+                            </div>
+                            <span className="text-[10px] font-bold uppercase tracking-wider">{t.send}</span>
+                        </button>
+                        <button className="flex flex-col items-center space-y-2 group">
+                            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                            </div>
+                            <span className="text-[10px] font-bold uppercase tracking-wider">{t.receive}</span>
+                        </button>
+                        <button className="flex flex-col items-center space-y-2 group">
+                            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
+                            </div>
+                            <span className="text-[10px] font-bold uppercase tracking-wider">{t.convert}</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Transactions List */}
+            <div>
+                <div className="flex items-center justify-between mb-6 px-2">
+                    <h3 className="text-xl font-black text-gray-900">{t.transactions}</h3>
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{activeCurrency}</span>
+                </div>
+
+                <div className="space-y-3">
+                    {filteredTransactions.length > 0 ? (
+                        filteredTransactions.map((tx) => (
+                            <div key={tx.id} className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm flex items-center justify-between group hover:border-blue-100 transition-colors">
+                                <div className="flex items-center space-x-4">
+                                    <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-xl group-hover:scale-110 transition-transform overflow-hidden">
+                                        {tx.icon.startsWith('/') ? <img src={tx.icon} alt={tx.name} className="w-full h-full object-cover" /> : tx.icon}
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-gray-900 leading-none mb-1">{tx.name}</p>
+                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">{tx.date}</p>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <span className={`text-lg font-black tabular-nums ${tx.type === 'incoming' ? 'text-green-600' : 'text-gray-900'}`}>
+                                        {tx.amount}
+                                    </span>
+                                    <p className="text-[10px] font-bold text-gray-400">{activeCurrency}</p>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="text-center py-20 bg-gray-50/50 rounded-[2.5rem] border-2 border-dashed border-gray-100">
+                            <div className="text-4xl mb-4 opacity-20">🌫️</div>
+                            <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">
+                                {t.empty}
+                            </p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default Dashboard;

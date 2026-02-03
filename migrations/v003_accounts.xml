@@ -60,7 +60,7 @@
     <changeSet id="003-003-currencies" author="carlos.netto">
         <!--
             All supported currencies (fiat + crypto + stablecoins).
-            decimals: Default precision. NULL when it varies by blockchain.
+            decimals: Default precision (required for all currencies).
         -->
         <createTable tableName="currencies" schemaName="accounts_schema">
             <column name="id" type="UUID" defaultValueComputed="gen_random_uuid()">
@@ -70,7 +70,9 @@
                 <constraints unique="true" nullable="false"/>
             </column>
             <column name="name" type="VARCHAR(100)"/>
-            <column name="decimals" type="INTEGER"/>
+            <column name="decimals" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
             <column name="asset_type_code" type="VARCHAR(20)">
                 <constraints foreignKeyName="fk_curr_asset"
                     referencedTableName="asset_types"
@@ -84,7 +86,8 @@
         <!--
             Maps currencies to blockchains:
             - contract_address: Token contract (NULL for native assets)
-            - network_decimals: Override when decimals differ per chain
+            - network_decimals: Override only when different from currency.decimals
+              (NULL means use the currency's default decimals)
         -->
         <createTable tableName="currency_blockchain_configs" schemaName="accounts_schema">
             <column name="currency_id" type="UUID">
@@ -300,6 +303,44 @@
             COMMENT ON COLUMN accounts_schema.account_details_us.account_number IS
             'Bank account number (length varies by institution)';
         </sql>
+    </changeSet>
+
+    <!-- ==================== Validation Triggers ==================== -->
+    <changeSet id="003-012-network-decimals-trigger" author="carlos.netto">
+        <!--
+            Enforces that network_decimals is only set when different from currency default.
+            If someone tries to insert network_decimals = currency.decimals, it auto-nullifies.
+        -->
+        <sql splitStatements="false">
+            CREATE OR REPLACE FUNCTION accounts_schema.fn_validate_network_decimals()
+            RETURNS TRIGGER AS $$
+            DECLARE
+                currency_default_decimals INTEGER;
+            BEGIN
+                SELECT decimals INTO currency_default_decimals
+                FROM accounts_schema.currencies
+                WHERE id = NEW.currency_id;
+
+                IF NEW.network_decimals IS NOT NULL AND NEW.network_decimals = currency_default_decimals THEN
+                    NEW.network_decimals := NULL;
+                END IF;
+
+                RETURN NEW;
+            END;
+            $$ LANGUAGE plpgsql;
+
+            CREATE TRIGGER trg_validate_network_decimals
+                BEFORE INSERT OR UPDATE ON accounts_schema.currency_blockchain_configs
+                FOR EACH ROW
+                EXECUTE FUNCTION accounts_schema.fn_validate_network_decimals();
+
+            COMMENT ON COLUMN accounts_schema.currency_blockchain_configs.network_decimals IS
+            'Override decimals for this blockchain. NULL means use currency.decimals default.';
+        </sql>
+        <rollback>
+            DROP TRIGGER IF EXISTS trg_validate_network_decimals ON accounts_schema.currency_blockchain_configs;
+            DROP FUNCTION IF EXISTS accounts_schema.fn_validate_network_decimals();
+        </rollback>
     </changeSet>
 
 </databaseChangeLog>
