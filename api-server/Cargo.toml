@@ -74,5 +74,5 @@ name = "drive_config"
 path = "src/bin/drive_config.rs"
 
 [[bin]]
-name = "import_wallet"
-path = "src/bin/import_wallet.rs"
+name = "wallet"
+path = "src/bin/wallet.rs"
