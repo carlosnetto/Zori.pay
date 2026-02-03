@@ -1,3 +1,13 @@
+// Copyright (c) 2026 Matera Systems, Inc. All rights reserved.
+//
+// This source code is the proprietary property of Matera Systems, Inc.
+// and is protected by copyright law and international treaties.
+//
+// This software is NOT open source. Use, reproduction, or distribution
+// of this code is strictly governed by the Matera Source License (MSL) v1.0.
+//
+// A copy of the MSL v1.0 should have been provided with this file.
+// If not, please contact: licensing@matera.com
 
 export type Language = 'en' | 'es' | 'pt' | 'zh' | 'fr' | 'it';
 
@@ -70,7 +80,7 @@ export const translations = {
       ]
     },
     cta: { title: 'Money shouldn’t have borders', subtitle: 'Zori makes them disappear. Pay like a local today.', btn: 'Start with Zori' },
-    footer: { mission: "Money shouldn't have borders. Zori makes them disappear.", rights: '© 2024 Zori. All rights reserved.', slogan: 'Built for a world without plastic cards.' },
+    footer: { mission: "Money shouldn't have borders. Zori makes them disappear.", rights: 'MTPSV SOCIEDADE PRESTADORA DE SERVICOS DE ATIVOS VIRTUAIS LTDA - CNPJ 64.687.332/0001-79', slogan: 'Built for a world without plastic cards.' },
     modal: { title: 'App available soon', desc: 'We are working hard to bring Zori to you. Stay tuned!', close: 'Close' },
     auth: {
       loginTitle: 'Welcome to Zori',
@@ -178,7 +188,7 @@ export const translations = {
       ]
     },
     cta: { title: 'El dinero no debería tener fronteras', subtitle: 'Zori las hace desaparecer. Empieza a pagar como un local hoy.', btn: 'Empezar con Zori' },
-    footer: { mission: 'Dinero sin fronteras. Zori las hace desaparecer.', rights: '© 2024 Zori. Todos los derechos reservados.', slogan: 'Creado para un mundo sin tarjetas de plástico.' },
+    footer: { mission: 'Dinero sin fronteras. Zori las hace desaparecer.', rights: 'MTPSV SOCIEDADE PRESTADORA DE SERVICOS DE ATIVOS VIRTUAIS LTDA - CNPJ 64.687.332/0001-79', slogan: 'Creado para un mundo sin tarjetas de plástico.' },
     modal: { title: 'App disponible muy pronto', desc: 'Estamos trabajando duro para traerte Zori. ¡Mantente al tanto!', close: 'Cerrar' },
     auth: {
       loginTitle: 'Bienvenido a Zori',
@@ -286,7 +296,7 @@ export const translations = {
       ]
     },
     cta: { title: 'Dinheiro não deve ter fronteiras', subtitle: 'Zori faz as fronteiras desaparecerem. Pague como um local.', btn: 'Começar com Zori' },
-    footer: { mission: 'Dinheiro sem fronteiras. Zori as faz desaparecer.', rights: '© 2024 Zori. Todos os direitos reservados.', slogan: 'Feito para um mundo sem cartões de plástico.' },
+    footer: { mission: 'Dinheiro sem fronteiras. Zori as faz desaparecer.', rights: 'MTPSV SOCIEDADE PRESTADORA DE SERVICOS DE ATIVOS VIRTUAIS LTDA - CNPJ 64.687.332/0001-79', slogan: 'Feito para um mundo sem cartões de plástico.' },
     modal: { title: 'App disponível em breve', desc: 'Estamos trabalhando muito para trazer o Zori até você. Fique ligado!', close: 'Fechar' },
     auth: {
       loginTitle: 'Bem-vindo ao Zori',
@@ -394,7 +404,7 @@ export const translations = {
       ]
     },
     cta: { title: '金钱不应有国界', subtitle: 'Zori 让国界消失。今天就开始像当地人一样支付。', btn: '开始使用 Zori' },
-    footer: { mission: '金钱不应有国界。Zori 让国界消失。', rights: '© 2024 Zori。保留所有权利。', slogan: '为告别塑料卡的世界而建。' },
+    footer: { mission: '金钱不应有国界。Zori 让国界消失。', rights: 'MTPSV SOCIEDADE PRESTADORA DE SERVICOS DE ATIVOS VIRTUAIS LTDA - CNPJ 64.687.332/0001-79', slogan: '为告别塑料卡的世界而建。' },
     modal: { title: '应用即将推出', desc: '我们正在努力为您带来 Zori。敬请期待！', close: '关闭' },
     auth: {
       loginTitle: '欢迎来到 Zori',
@@ -502,7 +512,7 @@ export const translations = {
       ]
     },
     cta: { title: "L'argent ne devrait pas avoir de frontières", subtitle: 'Zori les efface. Payez comme un local dès aujourd’hui.', btn: 'Lancer Zori' },
-    footer: { mission: "L'argent n'a pas de frontières. Zori les efface.", rights: '© 2024 Zori. Tous droits réservés.', slogan: 'Conçu pour un monde sans cartes plastiques.' },
+    footer: { mission: "L'argent n'a pas de frontières. Zori les efface.", rights: 'MTPSV SOCIEDADE PRESTADORA DE SERVICOS DE ATIVOS VIRTUAIS LTDA - CNPJ 64.687.332/0001-79', slogan: 'Conçu pour un monde sans cartes plastiques.' },
     modal: { title: 'App bientôt disponible', desc: 'Nous travaillons dur pour vous apporter Zori. Restez à l\'écoute !', close: 'Fermer' },
     auth: {
       loginTitle: 'Bienvenue chez Zori',
@@ -610,7 +620,7 @@ export const translations = {
       ]
     },
     cta: { title: 'Il denaro non dovrebbe avere confini', subtitle: 'Zori li fa sparire. Inizia a pagare come un locale oggi.', btn: 'Inizia con Zori' },
-    footer: { mission: 'Soldi senza confini. Zori li cancella.', rights: '© 2024 Zori. Tutti i diritti riservati.', slogan: 'Creato per un mondo senza carte di plastica.' },
+    footer: { mission: 'Soldi senza confini. Zori li cancella.', rights: 'MTPSV SOCIEDADE PRESTADORA DE SERVICOS DE ATIVOS VIRTUAIS LTDA - CNPJ 64.687.332/0001-79', slogan: 'Creato per un mondo senza carte di plastica.' },
     modal: { title: 'App disponibile a breve', desc: 'Stiamo lavorando sodo per portarti Zori. Rimanete sintonizzati!', close: 'Chiudi' },
     auth: {
       loginTitle: 'Benvenuto in Zori',
