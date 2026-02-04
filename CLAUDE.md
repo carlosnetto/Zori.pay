@@ -222,77 +222,33 @@ See `docs/DATABASE_SCHEMA.md` for complete documentation.
 
 ---
 
-## Google Drive Integration
+## Google Cloud Integration
 
-### Purpose
-KYC documents (ID photos, selfies, proof of address) are uploaded to Google Drive for compliance storage.
+Zori.pay uses Google Cloud for two purposes:
+1. **User Login** - Google OAuth for authentication
+2. **KYC Document Storage** - Google Drive for compliance documents
 
-### Architecture
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                     GOOGLE CLOUD PROJECT                          │
-│  Project ID: asdj238sjasd                                        │
-│  Project Number: 707398925642                                    │
-│                                                                   │
-│  ┌────────────────────────┐    ┌────────────────────────────┐   │
-│  │ OAuth 2.0 Client       │    │ Google Drive               │   │
-│  │ (User Consent Flow)    │    │                            │   │
-│  │                        │    │ Root Folder:               │   │
-│  │ Client ID:             │    │ 1ERvzZMc92XBv_k3SBxm...   │   │
-│  │ 964555560579-m91k...   │    │                            │   │
-│  │                        │    │ DOC_DB/                    │   │
-│  │ Used for:              │    │   └── {CPF}/               │   │
-│  │ - Drive authorization  │    │       ├── cnh_front.jpg    │   │
-│  │ - Token refresh        │    │       ├── cnh_back.jpg     │   │
-│  └────────────────────────┘    │       ├── selfie.jpg       │   │
-│                                 │       └── proof.pdf        │   │
-│                                 └────────────────────────────┘   │
-└──────────────────────────────────────────────────────────────────┘
-```
+> **IMPORTANT**: Full setup instructions are in [`docs/GOOGLE_CLOUD_SETUP.md`](docs/GOOGLE_CLOUD_SETUP.md)
 
-### OAuth Clients
+### Quick Reference
 
-There are two OAuth clients in the Google Cloud project:
+| Component | Purpose | Credential Location |
+|-----------|---------|---------------------|
+| User Login OAuth | Google Sign-In | `.credentials/google_client_id` and `google_client_secret` |
+| Drive OAuth | KYC document upload | `api-server/secrets/google-drive-token.json` |
 
-1. **User Login OAuth** (for Google Sign-In):
-   - Client ID: `964555560579-5bfmpqrmtub763b1d7vqufl3dh1p4t16.apps.googleusercontent.com`
-   - Used by: API auth endpoints
-
-2. **Drive Access OAuth** (for document upload):
-   - Client ID: `964555560579-m91kc16dq8ppsna1uv9gnu1d3q66tkue.apps.googleusercontent.com`
-   - Used by: `drive_config.rs` and `google_drive.rs`
-
-### Authorized Redirect URIs
-
-Configure these in [Google Cloud Console](https://console.cloud.google.com/apis/credentials):
+### Required Redirect URIs
 
 ```
-http://localhost:3000/auth/callback     # React dev
-http://localhost:8080/auth/callback     # API test page
+http://localhost:8080/auth/callback     # React dev (Vite)
 http://localhost:8085/callback          # Drive config tool
 https://zoripay.xyz/auth/callback       # Production
 ```
 
-### First-Time Setup
-
-1. **Run the Drive configuration tool**:
-   ```bash
-   cd api-server
-   cargo run --bin drive_config
-   ```
-
-2. **Browser opens for Google OAuth consent**:
-   - Log in with an account that has access to the Drive folder
-   - Grant "See, edit, create, and delete only the specific Google Drive files you use with this app" permission
-
-3. **Token saved**:
-   - Tokens stored in `api-server/secrets/google-drive-token.json`
-   - Auto-refreshed by `DriveClient` when expired
-
 ### File Organization in Drive
 
 ```
-Drive Root (1ERvzZMc92XBv_k3SBxmHLsCJnZUnqON_)
+Drive Root Folder
 └── DOC_DB/                           # Created automatically
     └── {CPF}/                        # e.g., 07289048881/
         ├── cnh_front.jpg             # Driver's license front
@@ -305,16 +261,10 @@ Drive Root (1ERvzZMc92XBv_k3SBxmHLsCJnZUnqON_)
 
 ```bash
 # api-server/.env
-GOOGLE_DRIVE_SERVICE_ACCOUNT_KEY=./secrets/google-drive-service-account.json  # Legacy, not used
-GOOGLE_DRIVE_ROOT_FOLDER_ID=1ERvzZMc92XBv_k3SBxmHLsCJnZUnqON_
+GOOGLE_CLIENT_ID=xxx.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=xxx
+GOOGLE_DRIVE_ROOT_FOLDER_ID=xxx
 ```
-
-### How It Works
-
-1. **KYC endpoint** (`/v1/kyc/open-account-br`) receives multipart form with documents
-2. **DriveClient** ensures folder structure exists: `DOC_DB/{CPF}/`
-3. **Files uploaded** with proper naming and MIME types
-4. **Tokens auto-refresh** when expired (stored refresh token)
 
 ---
 
@@ -387,7 +337,7 @@ Server runs on `http://localhost:3001`
 cd web
 npm run dev
 ```
-Frontend runs on `http://localhost:3000`
+Frontend runs on `http://localhost:8080`
 
 ### Start Cloudflare Tunnel
 ```bash
@@ -467,4 +417,4 @@ Carlos Netto is seeded for testing:
 
 ---
 
-*Last updated: 2026-02-03*
+*Last updated: 2026-02-04*
