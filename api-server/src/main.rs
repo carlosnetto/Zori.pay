@@ -65,13 +65,9 @@ async fn main() -> anyhow::Result<()> {
 
     let jwt = auth::jwt::JwtManager::new(&config.jwt_secret);
 
-    // Initialize Google Drive client
+    // Initialize Google Drive client (uses OAuth tokens from secrets/google-drive-token.json)
     let drive_client = Arc::new(
-        DriveClient::new(
-            &config.google_drive_service_account_key,
-            config.google_drive_root_folder_id.clone(),
-        )
-        .await?,
+        DriveClient::new(config.google_drive_root_folder_id.clone()).await?,
     );
     tracing::info!("Connected to Google Drive");
 

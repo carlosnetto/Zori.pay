@@ -77,7 +77,7 @@ impl DriveClient {
     ///
     /// Reads tokens from secrets/google-drive-token.json
     /// Run `cargo run --bin drive_config` first to set up OAuth.
-    pub async fn new(_key_path: &str, root_folder_id: String) -> Result<Self> {
+    pub async fn new(root_folder_id: String) -> Result<Self> {
         // Load token from file
         let token_data = std::fs::read_to_string(TOKEN_FILE)
             .context("Failed to read token file. Run 'cargo run --bin drive_config' first to authorize Google Drive access.")?;

@@ -39,7 +39,6 @@ pub struct Config {
     pub encryption_key_id: String,
 
     // Google Drive
-    pub google_drive_service_account_key: String,
     pub google_drive_root_folder_id: String,
 
     // File upload limits
@@ -96,8 +95,6 @@ impl Config {
             encryption_key_id: std::env::var("ENCRYPTION_KEY_ID")
                 .unwrap_or_else(|_| "env-v1".into()),
 
-            google_drive_service_account_key: std::env::var("GOOGLE_DRIVE_SERVICE_ACCOUNT_KEY")
-                .context("GOOGLE_DRIVE_SERVICE_ACCOUNT_KEY must be set")?,
             google_drive_root_folder_id: std::env::var("GOOGLE_DRIVE_ROOT_FOLDER_ID")
                 .context("GOOGLE_DRIVE_ROOT_FOLDER_ID must be set")?,
 

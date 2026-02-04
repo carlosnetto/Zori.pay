@@ -129,16 +129,25 @@ Zori.pay/
 │   └── kyc.yaml                  # KYC API
 │
 ├── docs/
-│   ├── DATABASE_SCHEMA.md        # Database tables and relationships
-│   ├── REACT_INTEGRATION.md      # Vite proxy and frontend setup
-│   ├── WEB_LOGIN_INTEGRATION.md  # Authentication flow
-│   ├── TESTING.md                # Testing guide
-│   └── UPDATE_GOOGLE_CALLBACK.md # Google OAuth configuration
+│   ├── CLOUDFLARE_TUNNEL_SETUP.md # Cloudflare Tunnel configuration
+│   ├── DATABASE_SCHEMA.md         # Database tables and relationships
+│   ├── GOOGLE_CLOUD_SETUP.md      # Google OAuth & Drive setup
+│   ├── REACT_INTEGRATION.md       # Vite proxy and frontend setup
+│   ├── TESTING.md                 # Testing guide
+│   ├── UPDATE_GOOGLE_CALLBACK.md  # Google OAuth callback URLs
+│   └── WEB_LOGIN_INTEGRATION.md   # Authentication flow
 │
 ├── .credentials/                  # Google Cloud config (gitignored)
 │   ├── google_client_id
 │   ├── google_client_secret
 │   └── README.md
+│
+├── ops/                              # Operations scripts and backups
+│   ├── create-migration-package.sh  # Package secrets for new machine
+│   ├── restore-migration-package.sh # Restore secrets on new machine
+│   ├── pg_dump.sh                   # PostgreSQL backup
+│   ├── pg_to_parquet.py             # Export DB to Parquet
+│   └── tunnel.sh                    # Start Cloudflare tunnel
 │
 ├── docker-compose.yml            # PostgreSQL + Liquibase
 ├── CLAUDE.md                     # This file (Claude context)
@@ -345,6 +354,8 @@ cloudflared tunnel run zori-api
 ```
 Required for production frontend to access local API.
 
+> **New machine?** See [`docs/CLOUDFLARE_TUNNEL_SETUP.md`](docs/CLOUDFLARE_TUNNEL_SETUP.md) for full setup instructions.
+
 ### Deploy to Cloudflare Pages
 ```bash
 cd web
@@ -363,6 +374,36 @@ docker-compose up -d
 cd api-server
 cargo run --bin drive_config
 ```
+
+---
+
+## New Machine Setup Checklist
+
+> **IMPORTANT**: When setting up on a new computer, don't forget these files that are gitignored:
+
+### Quick Migration (Recommended)
+
+```bash
+# On OLD machine - create package
+./ops/create-migration-package.sh
+# Transfer zori-secrets-*.zip to new machine (AirDrop, USB, etc.)
+
+# On NEW machine - restore package
+./ops/restore-migration-package.sh ~/path/to/zori-secrets-*.zip
+```
+
+### Manual Migration
+
+| File | Purpose | Action |
+|------|---------|--------|
+| `api-server/.env` | All API secrets (Google, DB, JWT, etc.) | **Copy from existing machine** |
+| `api-server/secrets/google-drive-token.json` | Drive OAuth tokens | Run `cargo run --bin drive_config` |
+| `~/.cloudflared/config.yml` | Tunnel configuration | Create new (see docs) |
+| `~/.cloudflared/*.json` | Tunnel credentials | Auto-created with new tunnel |
+
+See also:
+- [`docs/GOOGLE_CLOUD_SETUP.md`](docs/GOOGLE_CLOUD_SETUP.md) - Google OAuth setup
+- [`docs/CLOUDFLARE_TUNNEL_SETUP.md`](docs/CLOUDFLARE_TUNNEL_SETUP.md) - Tunnel setup
 
 ---
 

@@ -58,8 +58,7 @@ pub async fn test_drive_integration(
     tracing::info!("Starting Google Drive integration test...");
 
     // Test 1: Configuration loaded
-    details.config_loaded = !state.config.google_drive_service_account_key.is_empty()
-        && !state.config.google_drive_root_folder_id.is_empty();
+    details.config_loaded = !state.config.google_drive_root_folder_id.is_empty();
 
     if !details.config_loaded {
         details.errors.push("Configuration missing in .env file".to_string());
