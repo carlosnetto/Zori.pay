@@ -12,7 +12,9 @@
 pub mod auth;
 pub mod balance;
 pub mod kyc;
+pub mod profile;
 pub mod receive;
+pub mod reference_data;
 pub mod send;
 pub mod test_drive;
 pub mod transactions;

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2026 Matera Systems, Inc. All rights reserved.
+
+    This source code is the proprietary property of Matera Systems, Inc.
+    and is protected by copyright law and international treaties.
+
+    This software is NOT open source. Use, reproduction, or distribution
+    of this code is strictly governed by the Matera Source License (MSL) v1.0.
+
+    A copy of the MSL v1.0 should have been provided with this file.
+    If not, please contact: licensing@matera.com
+-->
+<!--
+    =====================================================================
+    v007: Contact Types NOT NULL Migration
+    =====================================================================
+
+    Makes phone_type and email_type columns NOT NULL with defaults.
+
+    CHANGES:
+    - Set default values for existing NULL phone_type to 'mobile'
+    - Set default values for existing NULL email_type to 'personal'
+    - Alter columns to NOT NULL with defaults
+    =====================================================================
+-->
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <!-- Update existing NULL phone_type values -->
+    <changeSet id="007-001-update-null-phone-types" author="carlos.netto">
+        <comment>Set existing NULL phone_type values to 'mobile'</comment>
+        <sql>
+            UPDATE registration_schema.person_phones
+            SET phone_type = 'mobile'
+            WHERE phone_type IS NULL OR phone_type = '';
+        </sql>
+    </changeSet>
+
+    <!-- Update existing NULL email_type values -->
+    <changeSet id="007-002-update-null-email-types" author="carlos.netto">
+        <comment>Set existing NULL email_type values to 'personal'</comment>
+        <sql>
+            UPDATE registration_schema.person_emails
+            SET email_type = 'personal'
+            WHERE email_type IS NULL OR email_type = '';
+        </sql>
+    </changeSet>
+
+    <!-- Make phone_type NOT NULL with default -->
+    <changeSet id="007-003-phone-type-not-null" author="carlos.netto">
+        <comment>Make phone_type NOT NULL with default 'mobile'</comment>
+        <addDefaultValue
+            schemaName="registration_schema"
+            tableName="person_phones"
+            columnName="phone_type"
+            defaultValue="mobile"/>
+        <addNotNullConstraint
+            schemaName="registration_schema"
+            tableName="person_phones"
+            columnName="phone_type"
+            columnDataType="varchar(20)"/>
+    </changeSet>
+
+    <!-- Make email_type NOT NULL with default -->
+    <changeSet id="007-004-email-type-not-null" author="carlos.netto">
+        <comment>Make email_type NOT NULL with default 'personal'</comment>
+        <addDefaultValue
+            schemaName="registration_schema"
+            tableName="person_emails"
+            columnName="email_type"
+            defaultValue="personal"/>
+        <addNotNullConstraint
+            schemaName="registration_schema"
+            tableName="person_emails"
+            columnName="email_type"
+            columnDataType="varchar(20)"/>
+    </changeSet>
+
+</databaseChangeLog>

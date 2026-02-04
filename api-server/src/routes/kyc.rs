@@ -323,9 +323,9 @@ async fn create_account_with_wallet(
     let phone_id = Database::insert_phone(&mut tx, &data.phone).await?;
     let person_id = Database::insert_person(&mut tx, &data.full_name, &data.mother_name).await?;
 
-    // 2. Link contacts
-    Database::insert_person_email(&mut tx, person_id, email_id, true).await?;
-    Database::insert_person_phone(&mut tx, person_id, phone_id, true).await?;
+    // 2. Link contacts with types
+    Database::insert_person_email(&mut tx, person_id, email_id, true, Some("personal")).await?;
+    Database::insert_person_phone(&mut tx, person_id, phone_id, true, Some("mobile")).await?;
 
     // 3. Store CPF
     Database::insert_person_documents_br(&mut tx, person_id, &data.cpf).await?;

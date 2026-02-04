@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2026 Matera Systems, Inc. All rights reserved.
+
+    This source code is the proprietary property of Matera Systems, Inc.
+    and is protected by copyright law and international treaties.
+
+    This software is NOT open source. Use, reproduction, or distribution
+    of this code is strictly governed by the Matera Source License (MSL) v1.0.
+
+    A copy of the MSL v1.0 should have been provided with this file.
+    If not, please contact: licensing@matera.com
+-->
+<!--
+    =====================================================================
+    v008: Phone Types and Email Types Reference Tables
+    =====================================================================
+
+    Creates reference tables for phone and email types to support
+    database-driven dropdowns in the frontend.
+
+    TABLES:
+    - registration_schema.phone_types (code PK, description)
+    - registration_schema.email_types (code PK, description)
+
+    VALUES:
+    - Phone types: mobile, home, work, voip, other
+    - Email types: personal, work, other
+
+    Also adds foreign key constraints to person_phones and person_emails.
+    =====================================================================
+-->
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <!-- Create phone_types reference table -->
+    <changeSet id="008-001-phone-types-table" author="carlos.netto">
+        <comment>Create phone_types reference table</comment>
+        <createTable schemaName="registration_schema" tableName="phone_types">
+            <column name="code" type="varchar(20)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="description" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Seed phone_types data -->
+    <changeSet id="008-002-phone-types-data" author="carlos.netto">
+        <comment>Seed phone_types reference data</comment>
+        <insert tableName="phone_types" schemaName="registration_schema">
+            <column name="code" value="mobile"/>
+            <column name="description" value="Mobile Phone"/>
+        </insert>
+        <insert tableName="phone_types" schemaName="registration_schema">
+            <column name="code" value="home"/>
+            <column name="description" value="Home Phone"/>
+        </insert>
+        <insert tableName="phone_types" schemaName="registration_schema">
+            <column name="code" value="work"/>
+            <column name="description" value="Work Phone"/>
+        </insert>
+        <insert tableName="phone_types" schemaName="registration_schema">
+            <column name="code" value="voip"/>
+            <column name="description" value="VoIP"/>
+        </insert>
+        <insert tableName="phone_types" schemaName="registration_schema">
+            <column name="code" value="other"/>
+            <column name="description" value="Other"/>
+        </insert>
+    </changeSet>
+
+    <!-- Create email_types reference table -->
+    <changeSet id="008-003-email-types-table" author="carlos.netto">
+        <comment>Create email_types reference table</comment>
+        <createTable schemaName="registration_schema" tableName="email_types">
+            <column name="code" type="varchar(20)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="description" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Seed email_types data -->
+    <changeSet id="008-004-email-types-data" author="carlos.netto">
+        <comment>Seed email_types reference data</comment>
+        <insert tableName="email_types" schemaName="registration_schema">
+            <column name="code" value="personal"/>
+            <column name="description" value="Personal Email"/>
+        </insert>
+        <insert tableName="email_types" schemaName="registration_schema">
+            <column name="code" value="work"/>
+            <column name="description" value="Work Email"/>
+        </insert>
+        <insert tableName="email_types" schemaName="registration_schema">
+            <column name="code" value="other"/>
+            <column name="description" value="Other"/>
+        </insert>
+    </changeSet>
+
+    <!-- Add foreign key constraint for person_phones.phone_type -->
+    <changeSet id="008-005-phone-type-fk" author="carlos.netto">
+        <comment>Add foreign key constraint for person_phones.phone_type</comment>
+        <addForeignKeyConstraint
+            baseTableSchemaName="registration_schema"
+            baseTableName="person_phones"
+            baseColumnNames="phone_type"
+            referencedTableSchemaName="registration_schema"
+            referencedTableName="phone_types"
+            referencedColumnNames="code"
+            constraintName="fk_person_phones_phone_type"/>
+    </changeSet>
+
+    <!-- Add foreign key constraint for person_emails.email_type -->
+    <changeSet id="008-006-email-type-fk" author="carlos.netto">
+        <comment>Add foreign key constraint for person_emails.email_type</comment>
+        <addForeignKeyConstraint
+            baseTableSchemaName="registration_schema"
+            baseTableName="person_emails"
+            baseColumnNames="email_type"
+            referencedTableSchemaName="registration_schema"
+            referencedTableName="email_types"
+            referencedColumnNames="code"
+            constraintName="fk_person_emails_email_type"/>
+    </changeSet>
+
+</databaseChangeLog>

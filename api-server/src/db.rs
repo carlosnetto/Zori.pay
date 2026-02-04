@@ -205,16 +205,18 @@ impl Database {
         person_id: Uuid,
         email_id: Uuid,
         is_primary_for_login: bool,
+        email_type: Option<&str>,
     ) -> Result<()> {
         sqlx::query(
             r#"
-            INSERT INTO registration_schema.person_emails (person_id, email_id, is_primary_for_login)
-            VALUES ($1, $2, $3)
+            INSERT INTO registration_schema.person_emails (person_id, email_id, is_primary_for_login, email_type)
+            VALUES ($1, $2, $3, $4)
             "#,
         )
         .bind(person_id)
         .bind(email_id)
         .bind(is_primary_for_login)
+        .bind(email_type)
         .execute(&mut **tx)
         .await?;
 
@@ -263,16 +265,18 @@ impl Database {
         person_id: Uuid,
         phone_id: Uuid,
         is_primary_for_login: bool,
+        phone_type: Option<&str>,
     ) -> Result<()> {
         sqlx::query(
             r#"
-            INSERT INTO registration_schema.person_phones (person_id, phone_id, is_primary_for_login)
-            VALUES ($1, $2, $3)
+            INSERT INTO registration_schema.person_phones (person_id, phone_id, is_primary_for_login, phone_type)
+            VALUES ($1, $2, $3, $4)
             "#,
         )
         .bind(person_id)
         .bind(phone_id)
         .bind(is_primary_for_login)
+        .bind(phone_type)
         .execute(&mut **tx)
         .await?;
 

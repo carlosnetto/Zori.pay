@@ -1,0 +1,322 @@
+# Copyright (c) 2026 Matera Systems, Inc. All rights reserved.
+#
+# This source code is the proprietary property of Matera Systems, Inc.
+# and is protected by copyright law and international treaties.
+#
+# This software is NOT open source. Use, reproduction, or distribution
+# of this code is strictly governed by the Matera Source License (MSL) v1.0.
+#
+# A copy of the MSL v1.0 should have been provided with this file.
+# If not, please contact: licensing@matera.com
+
+openapi: 3.1.0
+info:
+  title: Zori.pay Reference Data API
+  description: |
+    Public endpoint to retrieve reference data for dropdowns and forms.
+    This data is cacheable and does not require authentication.
+
+    ## Caching
+    - Response includes `ETag` header for cache validation
+    - Clients should cache response in sessionStorage
+    - Use `If-None-Match` header with stored ETag to check for updates
+    - Returns `304 Not Modified` if data hasn't changed
+
+  version: 1.0.0
+  contact:
+    name: Carlos Augusto Leite Netto
+    email: carlos.netto@gmail.com
+
+servers:
+  - url: https://api.zori.pay/v1
+    description: Production
+  - url: https://sandbox.api.zori.pay/v1
+    description: Sandbox
+
+tags:
+  - name: Reference Data
+    description: Static reference data for forms and dropdowns
+
+paths:
+  /reference-data:
+    get:
+      operationId: getReferenceData
+      summary: Get all reference data
+      description: |
+        Retrieves all reference data needed for frontend dropdowns and forms.
+        This endpoint is public and does not require authentication.
+
+        Response includes:
+        - Countries (ISO 3166-1 alpha-2)
+        - States/provinces for each country
+        - Phone types (mobile, home, work, voip, other)
+        - Email types (personal, work, other)
+        - Currencies (fiat, crypto, stablecoin)
+        - Blockchain networks
+        - Address types
+        - Asset types
+      tags:
+        - Reference Data
+      parameters:
+        - name: If-None-Match
+          in: header
+          description: ETag from previous response for cache validation
+          required: false
+          schema:
+            type: string
+          example: '"a1b2c3d4e5f6g7h8"'
+      responses:
+        '200':
+          description: Reference data retrieved successfully
+          headers:
+            ETag:
+              description: Entity tag for cache validation
+              schema:
+                type: string
+              example: '"a1b2c3d4e5f6g7h8"'
+            Cache-Control:
+              description: Caching directive
+              schema:
+                type: string
+              example: "public, max-age=3600"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReferenceDataResponse'
+        '304':
+          description: Not Modified - cached data is still valid
+          headers:
+            ETag:
+              description: Entity tag (same as before)
+              schema:
+                type: string
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  schemas:
+    ReferenceDataResponse:
+      type: object
+      required:
+        - countries
+        - states
+        - phone_types
+        - email_types
+        - currencies
+        - blockchain_networks
+        - address_types
+        - asset_types
+      properties:
+        countries:
+          type: array
+          description: List of countries (ISO 3166-1 alpha-2)
+          items:
+            $ref: '#/components/schemas/Country'
+        states:
+          type: array
+          description: List of states/provinces for all countries
+          items:
+            $ref: '#/components/schemas/State'
+        phone_types:
+          type: array
+          description: Available phone types
+          items:
+            $ref: '#/components/schemas/PhoneType'
+        email_types:
+          type: array
+          description: Available email types
+          items:
+            $ref: '#/components/schemas/EmailType'
+        currencies:
+          type: array
+          description: Supported currencies
+          items:
+            $ref: '#/components/schemas/Currency'
+        blockchain_networks:
+          type: array
+          description: Supported blockchain networks
+          items:
+            $ref: '#/components/schemas/BlockchainNetwork'
+        address_types:
+          type: array
+          description: Address types for contacts
+          items:
+            $ref: '#/components/schemas/AddressType'
+        asset_types:
+          type: array
+          description: Asset classification types
+          items:
+            $ref: '#/components/schemas/AssetType'
+
+    Country:
+      type: object
+      required:
+        - iso_code
+        - name
+      properties:
+        iso_code:
+          type: string
+          description: ISO 3166-1 alpha-2 country code
+          minLength: 2
+          maxLength: 2
+          example: "BR"
+        name:
+          type: string
+          description: Country name
+          example: "Brazil"
+
+    State:
+      type: object
+      required:
+        - country_code
+        - state_code
+        - name
+      properties:
+        country_code:
+          type: string
+          description: ISO 3166-1 alpha-2 country code
+          example: "BR"
+        state_code:
+          type: string
+          description: State/province code
+          example: "SP"
+        name:
+          type: string
+          description: State/province name
+          example: "Sao Paulo"
+
+    PhoneType:
+      type: object
+      required:
+        - code
+        - description
+      properties:
+        code:
+          type: string
+          description: Phone type code
+          enum:
+            - mobile
+            - home
+            - work
+            - voip
+            - other
+          example: "mobile"
+        description:
+          type: string
+          description: Human-readable description
+          example: "Mobile Phone"
+
+    EmailType:
+      type: object
+      required:
+        - code
+        - description
+      properties:
+        code:
+          type: string
+          description: Email type code
+          enum:
+            - personal
+            - work
+            - other
+          example: "personal"
+        description:
+          type: string
+          description: Human-readable description
+          example: "Personal Email"
+
+    Currency:
+      type: object
+      required:
+        - code
+        - name
+        - asset_type_code
+        - decimals
+      properties:
+        code:
+          type: string
+          description: Currency code (ISO 4217 for fiat, ticker for crypto)
+          example: "USDC"
+        name:
+          type: string
+          description: Currency name
+          example: "USD Coin"
+        asset_type_code:
+          type: string
+          description: Asset classification
+          enum:
+            - fiat
+            - crypto
+            - stablecoin
+          example: "stablecoin"
+        decimals:
+          type: integer
+          description: Decimal precision
+          minimum: 0
+          maximum: 18
+          example: 6
+
+    BlockchainNetwork:
+      type: object
+      required:
+        - code
+        - name
+      properties:
+        code:
+          type: string
+          description: Network code
+          example: "POLYGON"
+        name:
+          type: string
+          description: Network name
+          example: "Polygon"
+
+    AddressType:
+      type: object
+      required:
+        - code
+        - description
+      properties:
+        code:
+          type: string
+          description: Address type code
+          example: "residential"
+        description:
+          type: string
+          description: Human-readable description
+          example: "Residential Address"
+
+    AssetType:
+      type: object
+      required:
+        - code
+        - description
+      properties:
+        code:
+          type: string
+          description: Asset type code
+          example: "stablecoin"
+        description:
+          type: string
+          description: Human-readable description
+          example: "Stablecoin"
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "Internal error occurred"
+
+  responses:
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Internal error occurred"

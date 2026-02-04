@@ -19,7 +19,7 @@
     Seeds all lookup/reference data:
 
     GEOGRAPHY:
-    - Countries: BR, US, MC, VA, SG
+    - Countries: All 249 ISO 3166-1 alpha-2 codes (AD to ZW)
     - States: All Brazilian states (27), US states (50 + DC), stateless placeholders
 
     BLOCKCHAIN NETWORKS:
@@ -44,13 +44,288 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
 
-    <!-- ==================== Countries ==================== -->
+    <!-- ==================== Countries (Original 5) ==================== -->
     <changeSet id="006-001-countries" author="carlos.netto">
         <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="BR"/><column name="name" value="Brazil"/></insert>
         <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="US"/><column name="name" value="United States"/></insert>
         <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="MC"/><column name="name" value="Monaco"/></insert>
         <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="VA"/><column name="name" value="Vatican City"/></insert>
         <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="SG"/><column name="name" value="Singapore"/></insert>
+    </changeSet>
+
+    <!-- ==================== Countries (Remaining ISO 3166-1 alpha-2) ==================== -->
+    <changeSet id="006-001b-countries-all" author="carlos.netto">
+        <!-- A -->
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="AD"/><column name="name" value="Andorra"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="AE"/><column name="name" value="United Arab Emirates"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="AF"/><column name="name" value="Afghanistan"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="AG"/><column name="name" value="Antigua and Barbuda"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="AI"/><column name="name" value="Anguilla"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="AL"/><column name="name" value="Albania"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="AM"/><column name="name" value="Armenia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="AO"/><column name="name" value="Angola"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="AQ"/><column name="name" value="Antarctica"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="AR"/><column name="name" value="Argentina"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="AS"/><column name="name" value="American Samoa"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="AT"/><column name="name" value="Austria"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="AU"/><column name="name" value="Australia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="AW"/><column name="name" value="Aruba"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="AX"/><column name="name" value="Aland Islands"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="AZ"/><column name="name" value="Azerbaijan"/></insert>
+        <!-- B (excluding BR which already exists) -->
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="BA"/><column name="name" value="Bosnia and Herzegovina"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="BB"/><column name="name" value="Barbados"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="BD"/><column name="name" value="Bangladesh"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="BE"/><column name="name" value="Belgium"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="BF"/><column name="name" value="Burkina Faso"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="BG"/><column name="name" value="Bulgaria"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="BH"/><column name="name" value="Bahrain"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="BI"/><column name="name" value="Burundi"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="BJ"/><column name="name" value="Benin"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="BL"/><column name="name" value="Saint Barthelemy"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="BM"/><column name="name" value="Bermuda"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="BN"/><column name="name" value="Brunei"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="BO"/><column name="name" value="Bolivia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="BQ"/><column name="name" value="Caribbean Netherlands"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="BS"/><column name="name" value="Bahamas"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="BT"/><column name="name" value="Bhutan"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="BV"/><column name="name" value="Bouvet Island"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="BW"/><column name="name" value="Botswana"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="BY"/><column name="name" value="Belarus"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="BZ"/><column name="name" value="Belize"/></insert>
+        <!-- C -->
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="CA"/><column name="name" value="Canada"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="CC"/><column name="name" value="Cocos (Keeling) Islands"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="CD"/><column name="name" value="DR Congo"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="CF"/><column name="name" value="Central African Republic"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="CG"/><column name="name" value="Republic of the Congo"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="CH"/><column name="name" value="Switzerland"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="CI"/><column name="name" value="Ivory Coast"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="CK"/><column name="name" value="Cook Islands"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="CL"/><column name="name" value="Chile"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="CM"/><column name="name" value="Cameroon"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="CN"/><column name="name" value="China"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="CO"/><column name="name" value="Colombia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="CR"/><column name="name" value="Costa Rica"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="CU"/><column name="name" value="Cuba"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="CV"/><column name="name" value="Cape Verde"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="CW"/><column name="name" value="Curacao"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="CX"/><column name="name" value="Christmas Island"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="CY"/><column name="name" value="Cyprus"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="CZ"/><column name="name" value="Czechia"/></insert>
+        <!-- D -->
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="DE"/><column name="name" value="Germany"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="DJ"/><column name="name" value="Djibouti"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="DK"/><column name="name" value="Denmark"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="DM"/><column name="name" value="Dominica"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="DO"/><column name="name" value="Dominican Republic"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="DZ"/><column name="name" value="Algeria"/></insert>
+        <!-- E -->
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="EC"/><column name="name" value="Ecuador"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="EE"/><column name="name" value="Estonia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="EG"/><column name="name" value="Egypt"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="EH"/><column name="name" value="Western Sahara"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="ER"/><column name="name" value="Eritrea"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="ES"/><column name="name" value="Spain"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="ET"/><column name="name" value="Ethiopia"/></insert>
+        <!-- F -->
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="FI"/><column name="name" value="Finland"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="FJ"/><column name="name" value="Fiji"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="FK"/><column name="name" value="Falkland Islands"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="FM"/><column name="name" value="Micronesia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="FO"/><column name="name" value="Faroe Islands"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="FR"/><column name="name" value="France"/></insert>
+        <!-- G -->
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="GA"/><column name="name" value="Gabon"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="GB"/><column name="name" value="United Kingdom"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="GD"/><column name="name" value="Grenada"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="GE"/><column name="name" value="Georgia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="GF"/><column name="name" value="French Guiana"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="GG"/><column name="name" value="Guernsey"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="GH"/><column name="name" value="Ghana"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="GI"/><column name="name" value="Gibraltar"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="GL"/><column name="name" value="Greenland"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="GM"/><column name="name" value="Gambia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="GN"/><column name="name" value="Guinea"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="GP"/><column name="name" value="Guadeloupe"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="GQ"/><column name="name" value="Equatorial Guinea"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="GR"/><column name="name" value="Greece"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="GS"/><column name="name" value="South Georgia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="GT"/><column name="name" value="Guatemala"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="GU"/><column name="name" value="Guam"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="GW"/><column name="name" value="Guinea-Bissau"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="GY"/><column name="name" value="Guyana"/></insert>
+        <!-- H -->
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="HK"/><column name="name" value="Hong Kong"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="HM"/><column name="name" value="Heard Island and McDonald Islands"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="HN"/><column name="name" value="Honduras"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="HR"/><column name="name" value="Croatia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="HT"/><column name="name" value="Haiti"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="HU"/><column name="name" value="Hungary"/></insert>
+        <!-- I -->
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="ID"/><column name="name" value="Indonesia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="IE"/><column name="name" value="Ireland"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="IL"/><column name="name" value="Israel"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="IM"/><column name="name" value="Isle of Man"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="IN"/><column name="name" value="India"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="IO"/><column name="name" value="British Indian Ocean Territory"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="IQ"/><column name="name" value="Iraq"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="IR"/><column name="name" value="Iran"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="IS"/><column name="name" value="Iceland"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="IT"/><column name="name" value="Italy"/></insert>
+        <!-- J -->
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="JE"/><column name="name" value="Jersey"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="JM"/><column name="name" value="Jamaica"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="JO"/><column name="name" value="Jordan"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="JP"/><column name="name" value="Japan"/></insert>
+        <!-- K -->
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="KE"/><column name="name" value="Kenya"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="KG"/><column name="name" value="Kyrgyzstan"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="KH"/><column name="name" value="Cambodia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="KI"/><column name="name" value="Kiribati"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="KM"/><column name="name" value="Comoros"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="KN"/><column name="name" value="Saint Kitts and Nevis"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="KP"/><column name="name" value="North Korea"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="KR"/><column name="name" value="South Korea"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="KW"/><column name="name" value="Kuwait"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="KY"/><column name="name" value="Cayman Islands"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="KZ"/><column name="name" value="Kazakhstan"/></insert>
+        <!-- L -->
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="LA"/><column name="name" value="Laos"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="LB"/><column name="name" value="Lebanon"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="LC"/><column name="name" value="Saint Lucia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="LI"/><column name="name" value="Liechtenstein"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="LK"/><column name="name" value="Sri Lanka"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="LR"/><column name="name" value="Liberia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="LS"/><column name="name" value="Lesotho"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="LT"/><column name="name" value="Lithuania"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="LU"/><column name="name" value="Luxembourg"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="LV"/><column name="name" value="Latvia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="LY"/><column name="name" value="Libya"/></insert>
+        <!-- M (excluding MC which already exists) -->
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="MA"/><column name="name" value="Morocco"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="MD"/><column name="name" value="Moldova"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="ME"/><column name="name" value="Montenegro"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="MF"/><column name="name" value="Saint Martin"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="MG"/><column name="name" value="Madagascar"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="MH"/><column name="name" value="Marshall Islands"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="MK"/><column name="name" value="North Macedonia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="ML"/><column name="name" value="Mali"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="MM"/><column name="name" value="Myanmar"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="MN"/><column name="name" value="Mongolia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="MO"/><column name="name" value="Macao"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="MP"/><column name="name" value="Northern Mariana Islands"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="MQ"/><column name="name" value="Martinique"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="MR"/><column name="name" value="Mauritania"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="MS"/><column name="name" value="Montserrat"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="MT"/><column name="name" value="Malta"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="MU"/><column name="name" value="Mauritius"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="MV"/><column name="name" value="Maldives"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="MW"/><column name="name" value="Malawi"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="MX"/><column name="name" value="Mexico"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="MY"/><column name="name" value="Malaysia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="MZ"/><column name="name" value="Mozambique"/></insert>
+        <!-- N -->
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="NA"/><column name="name" value="Namibia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="NC"/><column name="name" value="New Caledonia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="NE"/><column name="name" value="Niger"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="NF"/><column name="name" value="Norfolk Island"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="NG"/><column name="name" value="Nigeria"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="NI"/><column name="name" value="Nicaragua"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="NL"/><column name="name" value="Netherlands"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="NO"/><column name="name" value="Norway"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="NP"/><column name="name" value="Nepal"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="NR"/><column name="name" value="Nauru"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="NU"/><column name="name" value="Niue"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="NZ"/><column name="name" value="New Zealand"/></insert>
+        <!-- O -->
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="OM"/><column name="name" value="Oman"/></insert>
+        <!-- P -->
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="PA"/><column name="name" value="Panama"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="PE"/><column name="name" value="Peru"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="PF"/><column name="name" value="French Polynesia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="PG"/><column name="name" value="Papua New Guinea"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="PH"/><column name="name" value="Philippines"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="PK"/><column name="name" value="Pakistan"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="PL"/><column name="name" value="Poland"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="PM"/><column name="name" value="Saint Pierre and Miquelon"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="PN"/><column name="name" value="Pitcairn Islands"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="PR"/><column name="name" value="Puerto Rico"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="PS"/><column name="name" value="Palestine"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="PT"/><column name="name" value="Portugal"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="PW"/><column name="name" value="Palau"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="PY"/><column name="name" value="Paraguay"/></insert>
+        <!-- Q -->
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="QA"/><column name="name" value="Qatar"/></insert>
+        <!-- R -->
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="RE"/><column name="name" value="Reunion"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="RO"/><column name="name" value="Romania"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="RS"/><column name="name" value="Serbia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="RU"/><column name="name" value="Russia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="RW"/><column name="name" value="Rwanda"/></insert>
+        <!-- S (excluding SG which already exists) -->
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="SA"/><column name="name" value="Saudi Arabia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="SB"/><column name="name" value="Solomon Islands"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="SC"/><column name="name" value="Seychelles"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="SD"/><column name="name" value="Sudan"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="SE"/><column name="name" value="Sweden"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="SH"/><column name="name" value="Saint Helena"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="SI"/><column name="name" value="Slovenia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="SJ"/><column name="name" value="Svalbard and Jan Mayen"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="SK"/><column name="name" value="Slovakia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="SL"/><column name="name" value="Sierra Leone"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="SM"/><column name="name" value="San Marino"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="SN"/><column name="name" value="Senegal"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="SO"/><column name="name" value="Somalia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="SR"/><column name="name" value="Suriname"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="SS"/><column name="name" value="South Sudan"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="ST"/><column name="name" value="Sao Tome and Principe"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="SV"/><column name="name" value="El Salvador"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="SX"/><column name="name" value="Sint Maarten"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="SY"/><column name="name" value="Syria"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="SZ"/><column name="name" value="Eswatini"/></insert>
+        <!-- T -->
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="TC"/><column name="name" value="Turks and Caicos Islands"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="TD"/><column name="name" value="Chad"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="TF"/><column name="name" value="French Southern Territories"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="TG"/><column name="name" value="Togo"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="TH"/><column name="name" value="Thailand"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="TJ"/><column name="name" value="Tajikistan"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="TK"/><column name="name" value="Tokelau"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="TL"/><column name="name" value="Timor-Leste"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="TM"/><column name="name" value="Turkmenistan"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="TN"/><column name="name" value="Tunisia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="TO"/><column name="name" value="Tonga"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="TR"/><column name="name" value="Turkey"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="TT"/><column name="name" value="Trinidad and Tobago"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="TV"/><column name="name" value="Tuvalu"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="TW"/><column name="name" value="Taiwan"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="TZ"/><column name="name" value="Tanzania"/></insert>
+        <!-- U (excluding US which already exists) -->
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="UA"/><column name="name" value="Ukraine"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="UG"/><column name="name" value="Uganda"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="UM"/><column name="name" value="United States Minor Outlying Islands"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="UY"/><column name="name" value="Uruguay"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="UZ"/><column name="name" value="Uzbekistan"/></insert>
+        <!-- V (excluding VA which already exists) -->
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="VC"/><column name="name" value="Saint Vincent and the Grenadines"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="VE"/><column name="name" value="Venezuela"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="VG"/><column name="name" value="British Virgin Islands"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="VI"/><column name="name" value="U.S. Virgin Islands"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="VN"/><column name="name" value="Vietnam"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="VU"/><column name="name" value="Vanuatu"/></insert>
+        <!-- W -->
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="WF"/><column name="name" value="Wallis and Futuna"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="WS"/><column name="name" value="Samoa"/></insert>
+        <!-- X - Kosovo (user-assigned code) -->
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="XK"/><column name="name" value="Kosovo"/></insert>
+        <!-- Y -->
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="YE"/><column name="name" value="Yemen"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="YT"/><column name="name" value="Mayotte"/></insert>
+        <!-- Z -->
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="ZA"/><column name="name" value="South Africa"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="ZM"/><column name="name" value="Zambia"/></insert>
+        <insert tableName="countries" schemaName="registration_schema"><column name="iso_code" value="ZW"/><column name="name" value="Zimbabwe"/></insert>
     </changeSet>
 
     <!-- ==================== Brazilian States (27) ==================== -->

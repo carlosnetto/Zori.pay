@@ -23,10 +23,11 @@ import LoginModal from './components/LoginModal';
 import PasskeyVerify from './components/PasskeyVerify';
 import Dashboard from './components/Dashboard';
 import Onboarding from './components/Onboarding';
+import Settings from './components/Settings';
 import { Language, translations } from './translations';
 import { authService } from './services/auth';
 
-type ViewState = 'landing' | 'onboarding' | 'dashboard';
+type ViewState = 'landing' | 'onboarding' | 'dashboard' | 'settings';
 
 const App: React.FC = () => {
   const navigate = useNavigate();
@@ -139,6 +140,10 @@ const App: React.FC = () => {
     window.location.reload();
   };
 
+  const handleGoToSettings = () => {
+    setCurrentView('settings');
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -162,6 +167,7 @@ const App: React.FC = () => {
         onSignIn={openLoginModal}
         isLoggedIn={isLoggedIn}
         onSignOut={handleSignOut}
+        onSettings={handleGoToSettings}
         currentView={currentView}
       />
 
@@ -199,6 +205,10 @@ const App: React.FC = () => {
 
         {currentView === 'onboarding' && (
           <Onboarding currentLang={currentLang} onGoHome={handleGoHome} />
+        )}
+
+        {currentView === 'settings' && (
+          <Settings currentLang={currentLang} onBack={() => setCurrentView('dashboard')} />
         )}
       </main>
 

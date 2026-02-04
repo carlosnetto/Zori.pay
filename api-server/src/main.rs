@@ -98,6 +98,8 @@ async fn main() -> anyhow::Result<()> {
         .route("/v1/send", post(routes::send::send_transaction))
         .route("/v1/send/estimate", post(routes::send::estimate_transaction))
         .route("/v1/transactions", get(routes::transactions::get_transactions))
+        .route("/v1/profile", get(routes::profile::get_profile))
+        .route("/v1/reference-data", get(routes::reference_data::get_reference_data))
         .route("/v1/kyc/open-account-br", post(routes::kyc::open_account_br)
             .layer(DefaultBodyLimit::max(50 * 1024 * 1024))) // 50MB limit for file uploads
         // Test routes

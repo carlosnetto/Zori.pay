@@ -64,4 +64,10 @@
     <!-- Reference Data -->
     <include file="v006_seed_reference_data.xml" relativeToChangelogFile="true"/>
 
+    <!-- Contact Types NOT NULL -->
+    <include file="v007_contact_types_not_null.xml" relativeToChangelogFile="true"/>
+
+    <!-- Phone/Email Types Reference Tables -->
+    <include file="v008_contact_types.xml" relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

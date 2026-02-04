@@ -186,19 +186,32 @@ const Dashboard: React.FC<DashboardProps> = ({ currentLang }) => {
 
     // Error state
     if (error) {
+        const isSessionExpired = error.toLowerCase().includes('session expired');
+
         return (
             <div className="pt-24 pb-12 max-w-lg mx-auto px-4 sm:px-6">
                 <div className="flex items-center justify-center min-h-[400px]">
                     <div className="text-center bg-red-50 p-8 rounded-3xl border border-red-100">
-                        <div className="text-4xl mb-4">⚠️</div>
-                        <p className="text-sm font-bold text-red-600 mb-2">Failed to load balances</p>
-                        <p className="text-xs text-gray-600">{error}</p>
-                        <button
-                            onClick={() => window.location.reload()}
-                            className="mt-4 px-6 py-2 bg-red-600 text-white text-sm font-bold rounded-full hover:bg-red-700"
-                        >
-                            Retry
-                        </button>
+                        <div className="text-4xl mb-4">{isSessionExpired ? '🔒' : '⚠️'}</div>
+                        <p className="text-sm font-bold text-red-600 mb-2">
+                            {isSessionExpired ? 'Session Expired' : 'Failed to load balances'}
+                        </p>
+                        <p className="text-xs text-gray-600 mb-4">{error}</p>
+                        {isSessionExpired ? (
+                            <button
+                                onClick={() => window.location.reload()}
+                                className="px-6 py-2 bg-blue-600 text-white text-sm font-bold rounded-full hover:bg-blue-700"
+                            >
+                                Login again
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => window.location.reload()}
+                                className="px-6 py-2 bg-red-600 text-white text-sm font-bold rounded-full hover:bg-red-700"
+                            >
+                                Retry
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
