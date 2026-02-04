@@ -104,6 +104,8 @@ Full OpenAPI 3.1.0 specifications in `openapi/` directory:
 | [send.yaml](openapi/send.yaml) | Send transactions + fee estimation |
 | [transactions.yaml](openapi/transactions.yaml) | Transaction history |
 | [kyc.yaml](openapi/kyc.yaml) | Brazilian account opening |
+| [profile.yaml](openapi/profile.yaml) | User profile retrieval |
+| [reference-data.yaml](openapi/reference-data.yaml) | Static reference data (countries, currencies, etc.) |
 
 ## Database
 

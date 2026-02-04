@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zori.pay API Documentation</title>
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: #334155;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    header {
+      text-align: center;
+      padding: 3rem 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 3rem;
+    }
+
+    .logo {
+      font-size: 3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    .tagline {
+      color: var(--text-muted);
+      font-size: 1.25rem;
+    }
+
+    .version {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      margin-top: 1rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--text);
+    }
+
+    .api-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .api-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: transform 0.2s, border-color 0.2s;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .api-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+
+    .api-card h3 {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .api-card p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .endpoints {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .endpoint {
+      background: var(--bg);
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+      color: var(--text-muted);
+    }
+
+    .method {
+      font-weight: 600;
+      margin-right: 0.25rem;
+    }
+
+    .method.get { color: #22c55e; }
+    .method.post { color: #3b82f6; }
+    .method.put { color: #f59e0b; }
+    .method.delete { color: #ef4444; }
+
+    .badge {
+      font-size: 0.7rem;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-weight: 500;
+    }
+
+    .badge.auth { background: #7c3aed; color: white; }
+    .badge.public { background: #059669; color: white; }
+
+    .base-urls {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .base-urls h2 {
+      margin-bottom: 1rem;
+    }
+
+    .url-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.5rem 0;
+    }
+
+    .url-row:not(:last-child) {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .url-label {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      min-width: 100px;
+    }
+
+    .url-value {
+      font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+      color: var(--primary);
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    footer a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">Zori.pay</div>
+      <p class="tagline">Multi-country Banking Platform API</p>
+      <span class="version">v1.0.0</span>
+    </header>
+
+    <section class="base-urls">
+      <h2>Base URLs</h2>
+      <div class="url-row">
+        <span class="url-label">Production</span>
+        <code class="url-value">https://zoripay.xyz/v1</code>
+      </div>
+      <div class="url-row">
+        <span class="url-label">Development</span>
+        <code class="url-value">http://localhost:3001/v1</code>
+      </div>
+    </section>
+
+    <h2>API Reference</h2>
+    <div class="api-grid">
+      <a href="auth.html" class="api-card">
+        <h3>Authentication <span class="badge auth">Auth Required</span></h3>
+        <p>Google OAuth + WebAuthn Passkey two-factor authentication flow</p>
+        <div class="endpoints">
+          <span class="endpoint"><span class="method post">POST</span>/auth/google</span>
+          <span class="endpoint"><span class="method post">POST</span>/auth/google/callback</span>
+          <span class="endpoint"><span class="method post">POST</span>/auth/passkey/challenge</span>
+          <span class="endpoint"><span class="method post">POST</span>/auth/passkey/verify</span>
+          <span class="endpoint"><span class="method post">POST</span>/auth/refresh</span>
+          <span class="endpoint"><span class="method post">POST</span>/auth/logout</span>
+        </div>
+      </a>
+
+      <a href="balance.html" class="api-card">
+        <h3>Balance <span class="badge auth">Auth Required</span></h3>
+        <p>Retrieve wallet balances for all supported cryptocurrencies</p>
+        <div class="endpoints">
+          <span class="endpoint"><span class="method get">GET</span>/balance</span>
+        </div>
+      </a>
+
+      <a href="receive.html" class="api-card">
+        <h3>Receive <span class="badge auth">Auth Required</span></h3>
+        <p>Get deposit address for receiving cryptocurrency</p>
+        <div class="endpoints">
+          <span class="endpoint"><span class="method get">GET</span>/receive</span>
+        </div>
+      </a>
+
+      <a href="send.html" class="api-card">
+        <h3>Send <span class="badge auth">Auth Required</span></h3>
+        <p>Send cryptocurrency and estimate transaction fees</p>
+        <div class="endpoints">
+          <span class="endpoint"><span class="method post">POST</span>/send</span>
+          <span class="endpoint"><span class="method post">POST</span>/send/estimate</span>
+        </div>
+      </a>
+
+      <a href="transactions.html" class="api-card">
+        <h3>Transactions <span class="badge auth">Auth Required</span></h3>
+        <p>View transaction history from the blockchain</p>
+        <div class="endpoints">
+          <span class="endpoint"><span class="method get">GET</span>/transactions</span>
+        </div>
+      </a>
+
+      <a href="profile.html" class="api-card">
+        <h3>Profile <span class="badge auth">Auth Required</span></h3>
+        <p>Retrieve user profile, contact info, and documents</p>
+        <div class="endpoints">
+          <span class="endpoint"><span class="method get">GET</span>/profile</span>
+        </div>
+      </a>
+
+      <a href="kyc.html" class="api-card">
+        <h3>KYC <span class="badge auth">Auth Required</span></h3>
+        <p>Account opening and identity verification</p>
+        <div class="endpoints">
+          <span class="endpoint"><span class="method post">POST</span>/kyc/open-account-br</span>
+        </div>
+      </a>
+
+      <a href="reference-data.html" class="api-card">
+        <h3>Reference Data <span class="badge public">Public</span></h3>
+        <p>Static data for forms: countries, currencies, etc.</p>
+        <div class="endpoints">
+          <span class="endpoint"><span class="method get">GET</span>/reference-data</span>
+        </div>
+      </a>
+    </div>
+
+    <footer>
+      <p>Zori.pay &copy; 2026 Matera Systems, Inc. All rights reserved.</p>
+      <p>Contact: <a href="mailto:carlos.netto@gmail.com">carlos.netto@gmail.com</a></p>
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,373 @@
+# Copyright (c) 2026 Matera Systems, Inc. All rights reserved.
+#
+# This source code is the proprietary property of Matera Systems, Inc.
+# and is protected by copyright law and international treaties.
+#
+# This software is NOT open source. Use, reproduction, or distribution
+# of this code is strictly governed by the Matera Source License (MSL) v1.0.
+#
+# A copy of the MSL v1.0 should have been provided with this file.
+# If not, please contact: licensing@matera.com
+
+openapi: 3.1.0
+info:
+  title: Zori.pay Profile API
+  description: |
+    Retrieve the authenticated user's profile information including personal
+    details, contact information, blockchain addresses, bank accounts, and
+    identity documents.
+
+    ## Authentication
+    This endpoint requires a valid access token obtained through the
+    authentication flow (Google OAuth + Passkey verification).
+
+  version: 1.0.0
+  contact:
+    name: Carlos Augusto Leite Netto
+    email: carlos.netto@gmail.com
+
+servers:
+  - url: https://api.zori.pay/v1
+    description: Production
+  - url: https://sandbox.api.zori.pay/v1
+    description: Sandbox
+
+tags:
+  - name: Profile
+    description: User profile management
+
+paths:
+  /profile:
+    get:
+      operationId: getProfile
+      summary: Get user profile
+      description: |
+        Retrieves the complete profile for the authenticated user.
+
+        Returns:
+        - Personal information (name, date of birth, birthplace)
+        - Contact information (phones, emails)
+        - Blockchain addresses (Polygon wallet)
+        - Bank accounts (Brazil, USA)
+        - Identity documents (Brazil CPF/RG, USA SSN/DL)
+
+        Fields will be `null` if not yet provided by the user.
+      tags:
+        - Profile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileResponse'
+              example:
+                personal:
+                  full_name: "Carlos Augusto Leite Netto"
+                  date_of_birth: "1985-03-15"
+                  birth_city: "Sao Paulo"
+                  birth_country: "BR"
+                contact:
+                  phones:
+                    - phone_number: "+5511999887766"
+                      phone_type: "mobile"
+                      is_primary_for_login: true
+                  emails:
+                    - email_address: "carlos.netto@gmail.com"
+                      email_type: "personal"
+                      is_primary_for_login: true
+                blockchain:
+                  polygon_address: "0x732D57fE3478984E59fF48d224653097ec0C730f"
+                accounts:
+                  brazil:
+                    bank_code: "341"
+                    branch_number: "1234"
+                    account_number: "56789-0"
+                  usa: null
+                documents:
+                  brazil:
+                    cpf: "072.890.488-81"
+                    rg_number: "12.345.678-9"
+                    rg_issuer: "SSP-SP"
+                  usa: null
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Access token obtained from /v1/auth/passkey/verify
+
+  schemas:
+    ProfileResponse:
+      type: object
+      properties:
+        personal:
+          oneOf:
+            - $ref: '#/components/schemas/PersonalInfo'
+            - type: 'null'
+          description: Personal information
+        contact:
+          oneOf:
+            - $ref: '#/components/schemas/ContactInfo'
+            - type: 'null'
+          description: Contact information (phones and emails)
+        blockchain:
+          oneOf:
+            - $ref: '#/components/schemas/BlockchainInfo'
+            - type: 'null'
+          description: Blockchain wallet addresses
+        accounts:
+          oneOf:
+            - $ref: '#/components/schemas/AccountsInfo'
+            - type: 'null'
+          description: Bank account information
+        documents:
+          oneOf:
+            - $ref: '#/components/schemas/DocumentsInfo'
+            - type: 'null'
+          description: Identity documents
+
+    PersonalInfo:
+      type: object
+      required:
+        - full_name
+      properties:
+        full_name:
+          type: string
+          description: User's full legal name
+          example: "Carlos Augusto Leite Netto"
+        date_of_birth:
+          type: string
+          format: date
+          nullable: true
+          description: Date of birth (YYYY-MM-DD)
+          example: "1985-03-15"
+        birth_city:
+          type: string
+          nullable: true
+          description: City of birth
+          example: "Sao Paulo"
+        birth_country:
+          type: string
+          nullable: true
+          description: Country of birth (ISO 3166-1 alpha-2)
+          example: "BR"
+
+    ContactInfo:
+      type: object
+      required:
+        - phones
+        - emails
+      properties:
+        phones:
+          type: array
+          description: List of phone numbers
+          items:
+            $ref: '#/components/schemas/PhoneInfo'
+        emails:
+          type: array
+          description: List of email addresses
+          items:
+            $ref: '#/components/schemas/EmailInfo'
+
+    PhoneInfo:
+      type: object
+      required:
+        - phone_number
+        - is_primary_for_login
+      properties:
+        phone_number:
+          type: string
+          description: Phone number with country code
+          example: "+5511999887766"
+        phone_type:
+          type: string
+          nullable: true
+          description: Type of phone
+          enum:
+            - mobile
+            - home
+            - work
+            - voip
+            - other
+          example: "mobile"
+        is_primary_for_login:
+          type: boolean
+          description: Whether this phone is used for login verification
+          example: true
+
+    EmailInfo:
+      type: object
+      required:
+        - email_address
+        - is_primary_for_login
+      properties:
+        email_address:
+          type: string
+          format: email
+          description: Email address
+          example: "carlos.netto@gmail.com"
+        email_type:
+          type: string
+          nullable: true
+          description: Type of email
+          enum:
+            - personal
+            - work
+            - other
+          example: "personal"
+        is_primary_for_login:
+          type: boolean
+          description: Whether this email is used for login
+          example: true
+
+    BlockchainInfo:
+      type: object
+      properties:
+        polygon_address:
+          type: string
+          nullable: true
+          description: Polygon network wallet address
+          pattern: "^0x[a-fA-F0-9]{40}$"
+          example: "0x732D57fE3478984E59fF48d224653097ec0C730f"
+
+    AccountsInfo:
+      type: object
+      properties:
+        brazil:
+          oneOf:
+            - $ref: '#/components/schemas/BrazilBankAccount'
+            - type: 'null'
+          description: Brazilian bank account details
+        usa:
+          oneOf:
+            - $ref: '#/components/schemas/UsaBankAccount'
+            - type: 'null'
+          description: US bank account details
+
+    BrazilBankAccount:
+      type: object
+      properties:
+        bank_code:
+          type: string
+          nullable: true
+          description: Brazilian bank code (COMPE)
+          example: "341"
+        branch_number:
+          type: string
+          nullable: true
+          description: Bank branch number
+          example: "1234"
+        account_number:
+          type: string
+          nullable: true
+          description: Account number with check digit
+          example: "56789-0"
+
+    UsaBankAccount:
+      type: object
+      required:
+        - routing_number
+        - account_number
+      properties:
+        routing_number:
+          type: string
+          description: ABA routing number
+          pattern: "^[0-9]{9}$"
+          example: "021000021"
+        account_number:
+          type: string
+          description: Bank account number
+          example: "123456789"
+
+    DocumentsInfo:
+      type: object
+      properties:
+        brazil:
+          oneOf:
+            - $ref: '#/components/schemas/BrazilDocuments'
+            - type: 'null'
+          description: Brazilian identity documents
+        usa:
+          oneOf:
+            - $ref: '#/components/schemas/UsaDocuments'
+            - type: 'null'
+          description: US identity documents
+
+    BrazilDocuments:
+      type: object
+      required:
+        - cpf
+      properties:
+        cpf:
+          type: string
+          description: Brazilian CPF number
+          pattern: "^[0-9]{3}\\.[0-9]{3}\\.[0-9]{3}-[0-9]{2}$"
+          example: "072.890.488-81"
+        rg_number:
+          type: string
+          nullable: true
+          description: Brazilian RG number
+          example: "12.345.678-9"
+        rg_issuer:
+          type: string
+          nullable: true
+          description: RG issuing authority
+          example: "SSP-SP"
+
+    UsaDocuments:
+      type: object
+      properties:
+        ssn_last4:
+          type: string
+          nullable: true
+          description: Last 4 digits of SSN
+          pattern: "^[0-9]{4}$"
+          example: "1234"
+        drivers_license_number:
+          type: string
+          nullable: true
+          description: Driver's license number
+          example: "D1234567"
+        drivers_license_state:
+          type: string
+          nullable: true
+          description: State that issued the driver's license
+          example: "CA"
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "Invalid token"
+
+  responses:
+    Unauthorized:
+      description: Missing or invalid authentication token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Invalid token"
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Internal error occurred"

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>KYC API - Zori.pay</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700" rel="stylesheet">
+  <style>
+    body { margin: 0; padding: 0; }
+    .back-link {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 1000;
+      background: #6366f1;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .back-link:hover { background: #4f46e5; }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="back-link">&larr; All APIs</a>
+  <redoc spec-url='../../openapi/kyc.yaml' theme='{
+    "colors": {
+      "primary": { "main": "#6366f1" }
+    },
+    "typography": {
+      "fontSize": "15px",
+      "headings": { "fontFamily": "Montserrat, sans-serif" }
+    },
+    "sidebar": {
+      "backgroundColor": "#1e293b",
+      "textColor": "#f1f5f9"
+    },
+    "rightPanel": {
+      "backgroundColor": "#0f172a"
+    }
+  }'></redoc>
+  <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+</body>
+</html>

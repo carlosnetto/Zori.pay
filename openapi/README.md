@@ -12,6 +12,8 @@ OpenAPI 3.1.0 specifications for all Zori.pay APIs.
 | [send.yaml](send.yaml) | Send transactions and fee estimation | 2 |
 | [transactions.yaml](transactions.yaml) | Transaction history | 1 |
 | [kyc.yaml](kyc.yaml) | KYC and account opening | 1 |
+| [profile.yaml](profile.yaml) | User profile retrieval | 1 |
+| [reference-data.yaml](reference-data.yaml) | Static reference data | 1 |
 
 ## All Endpoints
 
@@ -41,6 +43,13 @@ OpenAPI 3.1.0 specifications for all Zori.pay APIs.
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/v1/kyc/open-account-br` | Open Brazilian account (KYC) |
+| GET | `/v1/profile` | Get user profile |
+
+### Reference Data
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/v1/reference-data` | Get static reference data (countries, currencies, etc.) |
 
 ## Base URLs
 
