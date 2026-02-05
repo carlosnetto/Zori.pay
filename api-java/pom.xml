@@ -241,6 +241,9 @@
                         <configuration>
                             <mainClass>com.zoripay.api.App</mainClass>
                             <imageName>api-java</imageName>
+                            <metadataRepository>
+                                <enabled>true</enabled>
+                            </metadataRepository>
                             <buildArgs>
                                 <buildArg>--enable-preview</buildArg>
                                 <buildArg>-H:+ReportExceptionStackTraces</buildArg>

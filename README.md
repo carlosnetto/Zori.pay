@@ -17,6 +17,7 @@ Zori.pay is a financial platform that bridges traditional banking with blockchai
 
 - Docker and Docker Compose
 - Rust (for Rust API server) or Java 25+ (for Java API server)
+- GraalVM 25+ (optional, for native image compilation)
 - Node.js 18+ (for web frontend)
 
 ### 1. Start Database
@@ -33,13 +34,23 @@ cd api-server
 cargo run
 ```
 
-**Java (alternative):**
+**Java (JVM):**
 ```bash
 cd api-java
-./setup.sh
+mvn clean package -DskipTests
+java --enable-preview -jar target/api-java-0.1.0.jar
 ```
 
-Both run on `http://localhost:3001` — run one at a time.
+**Java (Native Image - fastest startup):**
+```bash
+cd api-java
+# Requires GraalVM 25+
+JAVA_HOME=/Library/Java/JavaVirtualMachines/graalvm-25.jdk/Contents/Home \
+mvn -Pnative clean package -DskipTests
+./target/api-java
+```
+
+All servers run on `http://localhost:3001` — run one at a time.
 
 ### 3. Start Web Frontend
 
@@ -74,7 +85,7 @@ Frontend runs on `http://localhost:3000`
 |-----------|------------|
 | Frontend | React + TypeScript + Vite + Tailwind CSS |
 | Backend (Rust) | Rust + Axum + SQLx |
-| Backend (Java) | Java 25 + Javalin + JDBI + Web3j |
+| Backend (Java) | Java 25 + Javalin + JDBI + Web3j + GraalVM Native Image |
 | Database | PostgreSQL + Liquibase |
 | Blockchain | Polygon (ethers-rs / Web3j) |
 | Auth | Google OAuth + WebAuthn Passkeys |
@@ -218,6 +229,18 @@ cloudflared tunnel run zori-api
 - **Authentication**: Two-factor (Google OAuth + Passkey)
 - **Server-Side Signing**: Private keys never leave the server
 - **Audit Trail**: Complete history tracking
+
+## Performance (Java Native Image)
+
+The Java API server can be compiled to a GraalVM native image for production:
+
+| Metric | JVM | Native Image |
+|--------|-----|--------------|
+| Startup time | ~2s | ~100ms |
+| Binary size | N/A (requires JVM) | ~108MB standalone |
+| Memory usage | Higher | Lower |
+
+Native image uses the [GraalVM Reachability Metadata Repository](https://github.com/oracle/graalvm-reachability-metadata) for automatic reflection configs of common libraries (Jackson, HikariCP, PostgreSQL, Netty, etc.) plus custom configs for Web3j and JDBI.
 
 ## License
 

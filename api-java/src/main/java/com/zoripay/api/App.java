@@ -64,11 +64,12 @@ public class App {
         var referenceDataRoutes = new ReferenceDataRoutes(state);
         var kycRoutes = new KycRoutes(state);
 
-        // Create Javalin app with virtual threads
+        // Create Javalin app (virtual threads enabled on JVM, disabled on native image)
+        boolean isNativeImage = System.getProperty("org.graalvm.nativeimage.imagecode") != null;
         var app = Javalin.create(cfg -> {
             cfg.jsonMapper(new JavalinJackson(mapper, true));
             cfg.http.maxRequestSize = 50 * 1024 * 1024L; // 50MB
-            cfg.useVirtualThreads = true;
+            cfg.useVirtualThreads = !isNativeImage;
 
             // CORS
             cfg.bundledPlugins.enableCors(cors -> cors.addRule(rule -> {
