@@ -16,7 +16,7 @@ Zori.pay is a financial platform that bridges traditional banking with blockchai
 ### Prerequisites
 
 - Docker and Docker Compose
-- Rust (for API server)
+- Rust (for Rust API server) or Java 25+ (for Java API server)
 - Node.js 18+ (for web frontend)
 
 ### 1. Start Database
@@ -27,12 +27,19 @@ docker-compose up -d
 
 ### 2. Start API Server
 
+**Rust (primary):**
 ```bash
 cd api-server
 cargo run
 ```
 
-Server runs on `http://localhost:3001`
+**Java (alternative):**
+```bash
+cd api-java
+./setup.sh
+```
+
+Both run on `http://localhost:3001` — run one at a time.
 
 ### 3. Start Web Frontend
 
@@ -48,8 +55,9 @@ Frontend runs on `http://localhost:3000`
 
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│ React Frontend  │────▶│ Rust API Server │────▶│ PostgreSQL      │
-│ (Vite + TS)     │     │ (Axum)          │     │ (Docker)        │
+│ React Frontend  │────▶│ API Server      │────▶│ PostgreSQL      │
+│ (Vite + TS)     │     │ Rust (Axum) or  │     │ (Docker)        │
+│                 │     │ Java (Javalin)  │     │                 │
 └─────────────────┘     └────────┬────────┘     └─────────────────┘
                                  │
                     ┌────────────┼────────────┐
@@ -65,9 +73,10 @@ Frontend runs on `http://localhost:3000`
 | Component | Technology |
 |-----------|------------|
 | Frontend | React + TypeScript + Vite + Tailwind CSS |
-| Backend | Rust + Axum + SQLx |
+| Backend (Rust) | Rust + Axum + SQLx |
+| Backend (Java) | Java 25 + Javalin + JDBI + Web3j |
 | Database | PostgreSQL + Liquibase |
-| Blockchain | Polygon (ethers-rs) |
+| Blockchain | Polygon (ethers-rs / Web3j) |
 | Auth | Google OAuth + WebAuthn Passkeys |
 | Hosting | Cloudflare Pages + Tunnel |
 
@@ -75,13 +84,22 @@ Frontend runs on `http://localhost:3000`
 
 ```
 Zori.pay/
-├── api-server/           # Rust backend
+├── api-server/           # Rust backend (primary)
 │   ├── src/
 │   │   ├── auth/        # Google OAuth, Passkey, JWT
 │   │   ├── crypto/      # HD wallets, ERC20
 │   │   ├── routes/      # API endpoints
 │   │   └── services/    # Google Drive
 │   └── secrets/         # Credentials (gitignored)
+├── api-java/             # Java backend (auto-translated from Rust)
+│   ├── src/main/java/com/zoripay/api/
+│   │   ├── auth/        # Google OAuth, Passkey, JWT
+│   │   ├── crypto/      # HD wallets, encryption
+│   │   ├── dao/         # Data access objects (JDBI)
+│   │   ├── route/       # API endpoint handlers
+│   │   └── service/     # Google Drive, blockchain
+│   ├── secrets -> ../api-server/secrets
+│   └── pom.xml          # Maven build config
 ├── web/                  # React frontend
 │   ├── src/
 │   │   ├── components/  # UI components
