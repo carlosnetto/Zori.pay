@@ -32,9 +32,10 @@
 │                          LOCAL DEVELOPMENT                               │
 │                                                                          │
 │  ┌──────────────────────┐         ┌────────────────────────────────┐   │
-│  │ Rust API Server      │         │ PostgreSQL                     │   │
-│  │ (Axum)               │◀───────▶│ (Docker)                       │   │
-│  │ localhost:3001       │         │ localhost:5432                 │   │
+│  │ API Server           │         │ PostgreSQL                     │   │
+│  │ Rust (Axum) or       │◀───────▶│ (Docker)                       │   │
+│  │ Java (Javalin)       │         │ localhost:5432                 │   │
+│  │ localhost:3001       │         │                                │   │
 │  └──────────────────────┘         └────────────────────────────────┘   │
 │           │                                                             │
 │           │                       ┌────────────────────────────────┐   │
@@ -85,6 +86,48 @@ Zori.pay/
 │   │   └── README.md
 │   ├── Cargo.toml
 │   └── .env                       # Environment variables
+│
+├── api-java/                      # Java backend (Javalin framework) — auto-translated from Rust
+│   ├── src/
+│   │   └── main/java/com/zoripay/api/
+│   │       ├── App.java              # Server entry point
+│   │       ├── AppConfig.java        # Environment configuration
+│   │       ├── AppState.java         # Shared application state
+│   │       ├── auth/                 # Authentication modules
+│   │       │   ├── GoogleOAuth.java  # Google OAuth client
+│   │       │   ├── PasskeyAuth.java  # WebAuthn/Passkey verification
+│   │       │   ├── JwtManager.java   # JWT token management
+│   │       │   ├── AuthExtractor.java# JWT extraction from requests
+│   │       │   ├── Claims.java       # JWT claims record
+│   │       │   └── TokenType.java    # Token type enum
+│   │       ├── crypto/               # Cryptographic operations
+│   │       │   ├── WalletService.java    # HD wallet derivation
+│   │       │   └── EncryptionService.java# AES-256-GCM encryption
+│   │       ├── dao/                  # Data access objects (JDBI)
+│   │       │   ├── KycDao.java       # KYC operations
+│   │       │   ├── PasskeyDao.java   # Passkey credential storage
+│   │       │   ├── PersonDao.java    # Person lookup
+│   │       │   ├── ProfileDao.java   # User profile queries
+│   │       │   ├── ReferenceDataDao.java # Reference data queries
+│   │       │   └── WalletDao.java    # Blockchain wallet queries
+│   │       ├── error/                # Error handling
+│   │       ├── model/                # Request/response records
+│   │       ├── route/                # API endpoint handlers
+│   │       │   ├── AuthRoutes.java   # /v1/auth/* endpoints
+│   │       │   ├── BalanceRoutes.java# /v1/balance endpoint
+│   │       │   ├── SendRoutes.java   # /v1/send endpoints
+│   │       │   ├── ReceiveRoutes.java# /v1/receive endpoint
+│   │       │   ├── TransactionRoutes.java # /v1/transactions endpoint
+│   │       │   ├── KycRoutes.java    # /v1/kyc/* endpoints
+│   │       │   ├── ProfileRoutes.java# /v1/profile endpoint
+│   │       │   ├── ReferenceDataRoutes.java # /v1/reference-data
+│   │       │   └── WebRoutes.java    # Static web routes
+│   │       └── service/              # External service clients
+│   │           ├── BlockchainService.java # Web3j/Alchemy integration
+│   │           └── DriveClient.java  # Google Drive API client
+│   ├── secrets -> ../api-server/secrets  # Symlink to shared secrets
+│   ├── pom.xml                       # Maven build (Java 25, preview features)
+│   └── setup.sh                      # Build & run script
 │
 ├── web/                           # React frontend (Vite + TypeScript)
 │   ├── src/
@@ -334,12 +377,19 @@ See `openapi/` directory for full OpenAPI 3.1.0 specifications.
 docker-compose up -d
 ```
 
-### Start API Server
+### Start API Server (Rust)
 ```bash
 cd api-server
 cargo run
 ```
 Server runs on `http://localhost:3001`
+
+### Start API Server (Java)
+```bash
+cd api-java
+./setup.sh
+```
+Server runs on `http://localhost:3001` (same port — run one at a time)
 
 ### Start Web Frontend
 ```bash
@@ -431,6 +481,7 @@ Carlos Netto is seeded for testing:
 5. **Alchemy API**: Used for transaction history (asset transfers API with "erc20" and "external" categories)
 6. **Google Drive for KYC**: Simple, reliable document storage with folder organization by CPF
 7. **Cloudflare Pages + Tunnel**: Static frontend hosting with tunnel to local API
+8. **Dual API Implementations**: Rust (Axum) is the primary server; Java (Javalin) is an auto-translated alternative using JDBI for DB access, Web3j for blockchain, and Java 25 with preview features
 
 ---
 
@@ -443,6 +494,7 @@ Carlos Netto is seeded for testing:
 5. **Web Frontend**: React app with Dashboard, Send/Receive modals, QR codes
 6. **OpenAPI Docs**: Complete API documentation for all endpoints
 7. **Cloudflare Deployment**: Frontend deployed, tunnel configured
+8. **Java API Server**: Auto-translated from Rust — Javalin + JDBI + Web3j (no tests yet)
 
 ---
 
@@ -454,8 +506,9 @@ Carlos Netto is seeded for testing:
 - [ ] Token refresh auto-handling in frontend
 - [ ] Rate limiting on API endpoints
 - [ ] Production-grade error handling
+- [ ] Add tests for Java API server (api-java)
 - [ ] Delete `migrations/old/` directory
 
 ---
 
-*Last updated: 2026-02-04*
+*Last updated: 2026-02-05*
