@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_app/generated/l10n/app_localizations.dart';
 import 'package:flutter_app/home_page.dart';
+import 'package:flutter_app/theme/app_colors.dart';
 
 void main() {
   runApp(const MyApp());
@@ -23,9 +25,10 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(
-              seedColor: Colors.indigo,
+              seedColor: AppColors.blue600,
               brightness: Brightness.light,
             ),
+            textTheme: GoogleFonts.interTextTheme(),
             useMaterial3: true,
           ),
           locale: locale,
