@@ -58,7 +58,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get hero_benefit3 => 'Pronto para Óculos AR';
 
   @override
-  String get hero_cta1 => 'Baixar Zori';
+  String get hero_cta1 => 'Abrir Conta';
 
   @override
   String get hero_cta2 => 'Como funciona';

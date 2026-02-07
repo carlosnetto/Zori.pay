@@ -57,7 +57,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get hero_benefit3 => '适配智能眼镜';
 
   @override
-  String get hero_cta1 => '获取 Zori';
+  String get hero_cta1 => '开设账户';
 
   @override
   String get hero_cta2 => '运作方式';

@@ -205,7 +205,7 @@ abstract class AppLocalizations {
   /// No description provided for @hero_cta1.
   ///
   /// In en, this message translates to:
-  /// **'Get Zori'**
+  /// **'Open Account'**
   String get hero_cta1;
 
   /// No description provided for @hero_cta2.

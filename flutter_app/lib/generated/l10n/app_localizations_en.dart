@@ -58,7 +58,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hero_benefit3 => 'Smartglass Ready';
 
   @override
-  String get hero_cta1 => 'Get Zori';
+  String get hero_cta1 => 'Open Account';
 
   @override
   String get hero_cta2 => 'How it works';
