@@ -20,7 +20,6 @@ echo ""
 
 # Create directory structure in temp
 mkdir -p "$TEMP_DIR/api-server/secrets"
-mkdir -p "$TEMP_DIR/.credentials"
 
 # Copy files
 echo "📁 Collecting files..."
@@ -41,12 +40,24 @@ else
     echo "   ✗ api-server/secrets/ (not found)"
 fi
 
+# Cloudflare Tunnel config
+if [ -d "$HOME/.cloudflared" ] && ls "$HOME/.cloudflared/"* &>/dev/null; then
+    mkdir -p "$TEMP_DIR/.cloudflared"
+    cp "$HOME/.cloudflared/"*.json "$TEMP_DIR/.cloudflared/" 2>/dev/null || true
+    cp "$HOME/.cloudflared/"*.pem "$TEMP_DIR/.cloudflared/" 2>/dev/null || true
+    cp "$HOME/.cloudflared/"*.yml "$TEMP_DIR/.cloudflared/" 2>/dev/null || true
+    echo "   ✓ .cloudflared/ (tunnel config, credentials, cert)"
+else
+    echo "   ⊘ .cloudflared/ (not found, skipping)"
+fi
+
 # Root credentials
-if [ -d "$PROJECT_ROOT/.credentials" ]; then
-    cp -r "$PROJECT_ROOT/.credentials/"* "$TEMP_DIR/.credentials/" 2>/dev/null || true
+if [ -d "$PROJECT_ROOT/.credentials" ] && ls "$PROJECT_ROOT/.credentials/"* &>/dev/null; then
+    mkdir -p "$TEMP_DIR/.credentials"
+    cp -r "$PROJECT_ROOT/.credentials/"* "$TEMP_DIR/.credentials/"
     echo "   ✓ .credentials/"
 else
-    echo "   ✗ .credentials/ (not found)"
+    echo "   ⊘ .credentials/ (empty or not found, skipping)"
 fi
 
 # Create README for the package
@@ -63,10 +74,13 @@ TO RESTORE ON NEW MACHINE:
    - api-server/.env -> <project>/api-server/.env
    - api-server/secrets/* -> <project>/api-server/secrets/
    - .credentials/* -> <project>/.credentials/
+   - .cloudflared/* -> ~/.cloudflared/
 
-ADDITIONAL SETUP REQUIRED:
-- Cloudflare Tunnel: See docs/CLOUDFLARE_TUNNEL_SETUP.md
-  (You need to create a new tunnel and update DNS)
+NOTE ON CLOUDFLARE TUNNEL:
+- If .cloudflared/ was included, the tunnel config is ready to use.
+  You may need to update the credentials-file path in config.yml
+  to match the new machine's username.
+- If .cloudflared/ was NOT included, see docs/CLOUDFLARE_TUNNEL_SETUP.md
 - Google Drive token may need refresh: cargo run --bin drive_config
 
 SECURITY:
@@ -94,7 +108,7 @@ echo "   - Transfer this file securely (AirDrop, encrypted USB, etc.)"
 echo "   - Delete after extracting on the new machine"
 echo "   - Never commit to git or share via email/Slack"
 echo ""
-echo "📖 On the new machine, also follow:"
-echo "   - docs/CLOUDFLARE_TUNNEL_SETUP.md (create new tunnel)"
+echo "📖 On the new machine:"
+echo "   - Update credentials-file path in ~/.cloudflared/config.yml if username differs"
 echo "   - docs/GOOGLE_CLOUD_SETUP.md (if tokens expired)"
 echo ""

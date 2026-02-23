@@ -48,11 +48,34 @@ if [ -d "$TEMP_DIR/api-server/secrets" ]; then
     echo "   ✓ api-server/secrets/"
 fi
 
+# Cloudflare Tunnel config
+if [ -d "$TEMP_DIR/.cloudflared" ] && ls "$TEMP_DIR/.cloudflared/"* &>/dev/null; then
+    mkdir -p "$HOME/.cloudflared"
+    cp -r "$TEMP_DIR/.cloudflared/"* "$HOME/.cloudflared/"
+    echo "   ✓ .cloudflared/ -> ~/.cloudflared/"
+    # Update credentials-file path if username differs
+    if [ -f "$HOME/.cloudflared/config.yml" ]; then
+        OLD_PATH=$(grep 'credentials-file' "$HOME/.cloudflared/config.yml" | awk '{print $2}')
+        if [ -n "$OLD_PATH" ] && [ ! -f "$OLD_PATH" ]; then
+            CRED_FILE=$(ls "$HOME/.cloudflared/"*.json 2>/dev/null | grep -v cert | head -1)
+            if [ -n "$CRED_FILE" ]; then
+                sed -i.bak "s|credentials-file:.*|credentials-file: $CRED_FILE|" "$HOME/.cloudflared/config.yml"
+                rm -f "$HOME/.cloudflared/config.yml.bak"
+                echo "   ✓ Updated credentials-file path in config.yml"
+            fi
+        fi
+    fi
+else
+    echo "   ⊘ .cloudflared/ (not in package, skipping)"
+fi
+
 # Root credentials
-if [ -d "$TEMP_DIR/.credentials" ]; then
+if [ -d "$TEMP_DIR/.credentials" ] && ls "$TEMP_DIR/.credentials/"* &>/dev/null; then
     mkdir -p "$PROJECT_ROOT/.credentials"
     cp -r "$TEMP_DIR/.credentials/"* "$PROJECT_ROOT/.credentials/"
     echo "   ✓ .credentials/"
+else
+    echo "   ⊘ .credentials/ (not in package, skipping)"
 fi
 
 # Cleanup
@@ -62,20 +85,16 @@ echo ""
 echo "✅ Migration package restored!"
 echo ""
 echo "📋 NEXT STEPS:"
-echo "   1. Set up Cloudflare Tunnel (see docs/CLOUDFLARE_TUNNEL_SETUP.md)"
-echo "      - Create new tunnel: cloudflared tunnel create zori-api"
-echo "      - Create ~/.cloudflared/config.yml"
-echo "      - Delete old DNS record in Cloudflare Dashboard"
-echo "      - Route DNS: cloudflared tunnel route dns zori-api api.zoripay.xyz"
-echo ""
-echo "   2. Start services:"
+echo "   1. Start services:"
 echo "      - Database: docker-compose up -d"
 echo "      - API: cd api-server && cargo run"
 echo "      - Tunnel: cloudflared tunnel run zori-api"
 echo "      - Frontend: cd web && npm run dev"
 echo ""
-echo "   3. Test Google Drive (if token expired):"
+echo "   2. Test Google Drive (if token expired):"
 echo "      cd api-server && cargo run --bin drive_config"
+echo ""
+echo "   3. If tunnel doesn't work, see docs/CLOUDFLARE_TUNNEL_SETUP.md"
 echo ""
 echo "⚠️  Delete the ZIP file now for security:"
 echo "   rm $ZIP_FILE"
